@@ -1,0 +1,3380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seat Booking</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#F3F5FB;
+  --surface:#FFFFFF;
+  --surface-2:#EEF1F8;
+  --rail:#0F172A;
+  --rail-soft:#1B2A44;
+  --rail-line:#2A3A57;
+  --ink:#131B2C;
+  --ink-soft:#5B6577;
+  --ink-faint:#8892A3;
+  --border:#E1E6EF;
+  --primary:#2F4FD1;
+  --primary-dark:#20399C;
+  --primary-soft:#E9EDFC;
+  --teal:#0E9E82;
+  --teal-soft:#DCF5EE;
+  --amber:#BE7A12;
+  --amber-soft:#FBEEDA;
+  --red:#D0453B;
+  --red-soft:#FCE7E5;
+  --purple:#7A4FDB;
+  --purple-soft:#F0EAFC;
+  --radius:12px;
+  --shadow:0 1px 2px rgba(20,30,60,.05), 0 10px 26px -14px rgba(24,38,74,.18);
+  --shadow-lg:0 8px 20px rgba(20,30,60,.08), 0 26px 54px -24px rgba(24,38,74,.28);
+  --shadow-sm:0 1px 2px rgba(20,30,60,.06);
+  --grad-primary:linear-gradient(135deg,#3556DA 0%,#2140B8 100%);
+  --grad-primary-hover:linear-gradient(135deg,#4363E8 0%,#2947C4 100%);
+  --grad-teal:linear-gradient(135deg,#12B295 0%,#0B8A72 100%);
+  --grad-rail:linear-gradient(180deg,#111C33 0%,#0B1220 100%);
+  --ring-primary:0 0 0 3px rgba(47,79,209,.16);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  font-size:14.5px;
+  font-weight:400;
+  line-height:1.55;
+  letter-spacing:0;
+  text-rendering:optimizeLegibility;
+  font-synthesis:none;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4,.display{font-family:inherit;font-weight:600;letter-spacing:-0.015em;line-height:1.2;}
+a{color:inherit;}
+.mono{font-family:inherit;}
+button{font-family:inherit;cursor:pointer;}
+input,select,textarea{font-family:inherit;}
+::selection{background:var(--primary-soft);}
+
+/* ---------- LOGIN SCREEN ---------- */
+#login-screen{
+  position:fixed;inset:0;z-index:200;
+  display:flex;color:#fff;
+  background:var(--bg);
+}
+.login-shell{display:flex;width:100%;height:100%;}
+
+/* --- left: brand / visual panel --- */
+.login-visual{
+  flex:1 1 44%;max-width:560px;position:relative;overflow:hidden;
+  display:flex;align-items:center;
+  background:
+    radial-gradient(circle at 15% 12%, rgba(67,99,232,.45) 0%, transparent 46%),
+    radial-gradient(circle at 85% 82%, rgba(18,178,149,.35) 0%, transparent 44%),
+    linear-gradient(160deg,#0E1730 0%, #0A1020 62%, #060910 100%);
+  padding:52px;
+}
+.login-visual-decor{position:absolute;inset:0;pointer-events:none;opacity:.5;
+  background-image:
+    linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px);
+  background-size:34px 34px;
+  -webkit-mask-image:radial-gradient(ellipse at 30% 30%, #000 0%, transparent 68%);
+          mask-image:radial-gradient(ellipse at 30% 30%, #000 0%, transparent 68%);
+}
+.login-visual::before{content:'';position:absolute;width:260px;height:260px;border-radius:50%;
+  background:radial-gradient(circle,rgba(67,99,232,.5),transparent 70%);
+  top:-70px;right:-70px;filter:blur(10px);animation:floatBlob 9s ease-in-out infinite;}
+.login-visual::after{content:'';position:absolute;width:200px;height:200px;border-radius:50%;
+  background:radial-gradient(circle,rgba(18,178,149,.42),transparent 70%);
+  bottom:-60px;left:-40px;filter:blur(10px);animation:floatBlob 11s ease-in-out infinite reverse;}
+@keyframes floatBlob{0%,100%{transform:translateY(0) scale(1);}50%{transform:translateY(18px) scale(1.06);}}
+.login-visual-inner{position:relative;z-index:1;max-width:400px;margin:0 auto;}
+.login-visual-brand{display:flex;align-items:center;gap:12px;margin-bottom:38px;}
+.login-mark-lg{width:44px;height:44px;border-radius:12px;display:block;
+  box-shadow:0 8px 22px -6px rgba(67,99,232,.6);}
+.login-visual-brandtext{line-height:1.3;}
+.login-visual-name{font-weight:800;font-size:15px;color:#fff;letter-spacing:-.01em;}
+.login-visual-loc{font-size:11px;color:#8FA0C4;}
+.login-visual h1{
+  font-size:32px;font-weight:800;line-height:1.22;margin:0 0 14px 0;color:#fff;letter-spacing:-.02em;
+}
+.login-visual h1 span{background:linear-gradient(135deg,#8FB0FF,#7EE8CE);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.login-visual p.tagline{color:#AEB8CC;font-size:14px;line-height:1.75;margin:0 0 30px 0;max-width:360px;}
+.login-visual-foot{margin-top:32px;font-size:11px;color:#5E6C86;letter-spacing:.02em;}
+
+/* --- right: form panel --- */
+.login-formside{flex:1 1 56%;overflow-y:auto;display:flex;align-items:center;justify-content:center;padding:40px 24px;}
+.login-formside-inner{width:100%;max-width:392px;}
+.login-formside-tag{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--primary);margin-bottom:10px;}
+.login-form-card{
+  background:var(--surface);color:var(--ink);border:1px solid var(--border);border-radius:18px;
+  padding:32px 30px;box-shadow:var(--shadow-lg);
+}
+.login-form-card h2{margin:0 0 6px 0;font-size:24px;font-weight:800;letter-spacing:-.02em;}
+.login-form-card p.sub2{margin:0 0 22px 0;color:var(--ink-soft);font-size:13.5px;line-height:1.7;}
+.field-group{margin-bottom:16px;}
+.field-group label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);margin-bottom:6px;}
+.field-input-wrap{position:relative;}
+.field-input-wrap input{
+  width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;
+  font-size:16px;font-family:inherit;background:var(--surface-2);color:var(--ink);
+  transition:border-color .15s ease, box-shadow .15s ease, background .15s ease;
+}
+.field-input-wrap input:focus{outline:none;border-color:var(--primary);box-shadow:var(--ring-primary);background:var(--surface);}
+.field-input-wrap input[type=password],.field-input-wrap input[type=text].has-toggle{padding-right:58px;}
+.pw-toggle{
+  position:absolute;right:6px;top:50%;transform:translateY(-50%);
+  border:none;background:none;color:var(--primary);font-size:11.5px;font-weight:600;
+  padding:6px 9px;border-radius:6px;cursor:pointer;
+}
+.pw-toggle:hover{background:var(--primary-soft);}
+.login-error{background:var(--red-soft);color:#8A2E27;font-size:12px;padding:9px 12px;border-radius:8px;margin-bottom:14px;display:none;}
+.login-error.active{display:block;}
+.login-submit{
+  width:100%;padding:13px 16px;border:none;border-radius:10px;
+  background:var(--grad-primary);color:#fff;font-weight:700;font-size:13.5px;letter-spacing:.01em;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+  box-shadow:0 10px 24px -8px rgba(47,79,209,.55);
+}
+.login-submit:hover{background:var(--grad-primary-hover);transform:translateY(-1px);box-shadow:0 14px 30px -8px rgba(47,79,209,.65);}
+.login-submit:disabled{opacity:.7;cursor:not-allowed;transform:none;box-shadow:none;}
+.login-foot2{margin-top:16px;font-size:11px;color:var(--ink-faint);text-align:center;}
+
+/* demo credentials now live in the dark visual panel */
+.demo-creds-card{
+  background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.16);border-radius:16px;
+  padding:18px 20px;margin-top:28px;box-shadow:none;position:relative;
+  backdrop-filter:blur(6px);
+}
+.demo-creds-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:2px;}
+.demo-creds-head h3{margin:0;font-size:13px;font-weight:700;color:#fff;}
+.demo-creds-note{font-size:11.5px;color:#AEB8CC;margin:2px 0 14px 0;}
+.pw-visibility-toggle{
+  display:flex;align-items:center;gap:6px;white-space:nowrap;
+  border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.07);color:#fff;
+  font-size:11px;font-weight:600;padding:8px 12px;border-radius:20px;width:100%;
+  justify-content:center;transition:all .15s ease;
+}
+.pw-visibility-toggle:hover{border-color:#12B295;color:#fff;background:rgba(18,178,149,.2);}
+.demo-creds-locked-note{font-size:11px;color:#8993A8;margin:10px 0 0 0;text-align:center;}
+.demo-cred-rows{margin-top:14px;}
+.demo-cred-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.1);}
+.demo-cred-row:last-child{border-bottom:none;}
+.dc-role{display:flex;align-items:center;gap:9px;min-width:0;}
+.dc-avatar{
+  width:29px;height:29px;border-radius:9px;flex-shrink:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.18),rgba(255,255,255,.05));color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;font-family:inherit;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.14);
+}
+.dc-name{font-size:12.5px;font-weight:700;color:#fff;}
+.dc-label{font-size:10.5px;color:#8993A8;}
+.dc-creds{text-align:right;font-family:inherit;font-size:11.5px;flex-shrink:0;}
+.dc-user{color:#E6EAF4;font-weight:600;}
+.dc-pass{color:#AEB8CC;margin-top:1px;}
+.dc-use-btn{
+  border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.07);font-size:10.5px;font-weight:700;
+  padding:6px 11px;border-radius:7px;color:#fff;flex-shrink:0;transition:all .15s ease;
+}
+.dc-use-btn:hover{border-color:#12B295;background:rgba(18,178,149,.2);transform:translateY(-1px);}
+
+@media(max-width:960px){
+  .login-shell{flex-direction:column;overflow-y:auto;}
+  .login-visual{max-width:none;flex:none;padding:36px 28px;}
+  .login-visual h1{font-size:26px;}
+  .login-visual-foot{margin-top:20px;}
+  .login-formside{flex:none;padding:32px 20px 48px;}
+}
+@media(max-width:480px){
+  .login-visual{padding:30px 22px;}
+  .login-visual h1{font-size:22px;}
+  .login-visual-brand{margin-bottom:24px;}
+  .login-form-card{padding:26px 20px;}
+}
+
+.spinner{
+  width:14px;height:14px;border-radius:50%;
+  border:2px solid #cbd3da;border-top-color:#2140B8;
+  animation:spin .7s linear infinite;display:inline-block;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+
+/* ---------- APP SHELL ---------- */
+#app{display:none;height:100vh;overflow:hidden;}
+#app.active{display:flex;}
+.rail{
+  width:224px;flex-shrink:0;background:var(--rail);color:#C9D2DC;
+  display:flex;flex-direction:column;padding:18px 14px;
+}
+.rail-brand{
+  display:flex;align-items:center;gap:10px;padding:6px 8px 20px 8px;
+}
+.rail-mark{
+  width:30px;height:30px;border-radius:8px;flex-shrink:0;
+  background:linear-gradient(135deg,#3A5C8C,#1E8A72);
+  display:flex;align-items:center;justify-content:center;
+  font-family:inherit;font-weight:400;font-size:14px;color:#fff;
+}
+.rail-brand-text{font-family:inherit;font-weight:700;font-size:14.5px;color:#fff;}
+.rail-brand-sub{font-size:10.5px;color:#7E8CA0;margin-top:1px;}
+.rail-nav{display:flex;flex-direction:column;gap:2px;margin-top:6px;}
+.rail-section-label{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:#5E6C7E;margin:16px 10px 6px 10px;}
+.rail-item{
+  display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;
+  color:#B7C1CD;font-size:13px;font-weight:500;border:none;background:none;text-align:left;width:100%;
+  transition:background .12s ease, color .12s ease;
+}
+.rail-item:hover{background:var(--rail-soft);color:#fff;}
+.rail-item.active{background:var(--primary);color:#fff;}
+.rail-icon{width:16px;text-align:center;font-size:14px;flex-shrink:0;}
+.rail-spacer{flex:1;}
+.rail-clock{
+  border-top:1px solid var(--rail-line);padding-top:14px;margin-top:10px;font-size:11.5px;color:#8593A5;
+}
+.rail-clock-time{font-family:inherit;color:#DCE3EA;font-size:15px;font-weight:600;margin-top:2px;}
+.rail-clock-btn{
+  margin-top:10px;width:100%;padding:7px 8px;border-radius:6px;border:1px solid var(--rail-line);
+  background:transparent;color:#9FB0C4;font-size:11.5px;font-weight:500;
+}
+.rail-clock-btn:hover{background:var(--rail-soft);color:#fff;}
+.rail-persona{display:none;border-top:1px solid var(--rail-line);padding-top:12px;margin-top:12px;}
+.office-entry-status{margin-top:10px;font-size:11.5px;padding:8px 9px;border-radius:7px;line-height:1.5;}
+.office-entry-status.in{background:rgba(30,138,114,.16);color:#8FE9CE;}
+.office-entry-status.out{background:rgba(193,68,58,.14);color:#F1A79D;}
+.office-entry-time{display:block;font-size:10.5px;color:#8593A5;margin-top:2px;}
+.persona-label{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:#5E6C7E;margin-bottom:7px;}
+.persona-btn{
+  display:flex;align-items:center;gap:8px;width:100%;padding:7px 8px;border-radius:7px;border:1px solid transparent;
+  background:transparent;color:#9FB0C4;font-size:12px;margin-bottom:3px;text-align:left;
+}
+.persona-btn.active{background:rgba(255,255,255,.06);border-color:var(--rail-line);color:#fff;}
+.persona-dot{width:7px;height:7px;border-radius:50%;background:#5E6C7E;flex-shrink:0;}
+.persona-btn.active .persona-dot{background:#1E8A72;}
+
+.main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;}
+.topbar{
+  height:56px;flex-shrink:0;background:var(--surface);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;padding:0 22px;
+}
+.topbar-title{font-family:inherit;font-weight:700;font-size:18px;letter-spacing:-0.01em;}
+.topbar-right{display:flex;align-items:center;gap:14px;}
+
+/* --- GLOBAL SEARCH --- */
+.global-search-wrap{position:relative;flex:1 1 auto;max-width:420px;margin:0 24px;display:none;}
+.global-search-wrap.hr-search-visible{display:block;}
+.global-search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:12.5px;opacity:.55;pointer-events:none;}
+.global-search-input{
+  width:100%;padding:8px 32px 8px 34px;border:1px solid var(--border);border-radius:20px;
+  font-size:12.5px;font-family:inherit;background:var(--surface-2);color:var(--ink);
+  transition:border-color .12s, background .12s;
+}
+.global-search-input:focus{outline:none;border-color:var(--primary);background:var(--surface);}
+.global-search-clear{
+  position:absolute;right:8px;top:50%;transform:translateY(-50%);border:none;background:none;
+  color:var(--ink-faint);font-size:11px;cursor:pointer;padding:4px;
+}
+.global-search-results{
+  display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;max-height:360px;overflow-y:auto;
+  background:var(--surface);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow);z-index:60;
+}
+.global-search-results.active{display:block;}
+.gsr-group-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-faint);padding:9px 14px 4px;}
+.gsr-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 14px;cursor:pointer;font-size:12.5px;}
+.gsr-item:hover{background:var(--surface-2);}
+.gsr-item .gsr-title{font-weight:600;color:var(--ink);}
+.gsr-item .gsr-sub{font-size:11px;color:var(--ink-soft);}
+.gsr-empty{padding:16px 14px;color:var(--ink-faint);font-size:12px;text-align:center;}
+
+
+@keyframes searchPulse{
+  0%{box-shadow:0 0 0 0 rgba(44,72,112,.55);}
+  70%{box-shadow:0 0 0 10px rgba(44,72,112,0);}
+  100%{box-shadow:0 0 0 0 rgba(44,72,112,0);}
+}
+.search-highlight{outline:2.5px solid var(--primary) !important;animation:searchPulse 1s ease-out 2;}
+.user-chip{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-soft);border:1px solid var(--border);background:var(--surface);border-radius:9px;padding:6px 8px;appearance:none;}
+.user-chip:hover{background:var(--surface-2);}
+
+.notif-wrap{position:relative;}
+.notif-bell{
+  position:relative;display:flex;align-items:center;justify-content:center;
+  width:36px;height:36px;border-radius:9px;border:1px solid var(--border);
+  background:var(--surface);font-size:16px;line-height:1;color:var(--ink-soft);
+  appearance:none;flex-shrink:0;
+}
+.notif-bell:hover{background:var(--surface-2);}
+.notif-badge{
+  position:absolute;top:-5px;right:-5px;min-width:16px;height:16px;padding:0 4px;
+  border-radius:8px;background:var(--red);color:#fff;font-size:10px;font-weight:700;
+  line-height:16px;text-align:center;border:2px solid var(--surface);
+}
+.notif-panel{
+  position:absolute;top:calc(100% + 8px);right:0;width:352px;max-width:calc(100vw - 24px);
+  max-height:440px;background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;box-shadow:var(--shadow);display:none;flex-direction:column;
+  z-index:250;overflow:hidden;
+}
+.notif-panel.active{display:flex;}
+.notif-panel-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 14px;border-bottom:1px solid var(--border);flex-shrink:0;
+}
+.notif-panel-header .np-title{font-weight:600;font-size:13.5px;}
+.notif-panel-header .np-role{font-size:10.5px;color:var(--ink-faint);margin-top:1px;}
+.notif-mark-all{border:none;background:none;color:var(--primary);font-size:11.5px;font-weight:500;padding:5px 7px;border-radius:6px;cursor:pointer;flex-shrink:0;}
+.notif-mark-all:hover{background:var(--primary-soft);}
+.notif-list{overflow-y:auto;}
+.notif-item{display:flex;gap:10px;padding:11px 14px;border-bottom:1px solid var(--border);cursor:pointer;align-items:flex-start;}
+.notif-item:last-child{border-bottom:none;}
+.notif-item:hover{background:var(--surface-2);}
+.notif-item.unread{background:var(--primary-soft);}
+.notif-item .ni-icon{font-size:14px;flex-shrink:0;margin-top:1px;}
+.notif-item .ni-body{min-width:0;flex:1;}
+.notif-item .ni-msg{font-size:12.5px;line-height:1.5;color:var(--ink);}
+.notif-item .ni-time{font-size:10.5px;color:var(--ink-faint);margin-top:3px;}
+.notif-item .ni-dot{width:7px;height:7px;border-radius:50%;background:var(--primary);flex-shrink:0;margin-top:5px;}
+.notif-empty{padding:32px 14px;text-align:center;color:var(--ink-faint);font-size:12.5px;}
+.user-avatar{
+  width:26px;height:26px;border-radius:50%;background:var(--primary-soft);color:var(--primary);
+  display:flex;align-items:center;justify-content:center;font-weight:600;font-size:11px;
+}
+.content{flex:1;overflow-y:auto;padding:24px 28px 60px 28px;}
+.view{display:none;}
+.view.active{display:block;animation:fadein .25s ease;}
+@keyframes fadein{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+/* generic pieces */
+.page-head{margin-bottom:20px;}
+.page-head h2{font-size:26px;margin:0 0 6px 0;font-weight:700;letter-spacing:-0.02em;}
+.page-head p{margin:0;color:var(--ink-soft);font-size:14px;line-height:1.75;max-width:72ch;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);}
+.card-pad{padding:18px 20px;}
+.grid{display:grid;gap:16px;}
+.grid-4{grid-template-columns:repeat(4,1fr);}
+.grid-3{grid-template-columns:repeat(3,1fr);}
+.grid-2{grid-template-columns:repeat(2,1fr);}
+@media(max-width:1100px){.grid-4{grid-template-columns:repeat(2,1fr);}.grid-3{grid-template-columns:repeat(2,1fr);}}
+
+.kpi-card{padding:16px 18px;}
+.kpi-label{font-size:11px;color:var(--ink-soft);font-weight:600;text-transform:uppercase;letter-spacing:.06em;}
+.kpi-value{font-family:inherit;font-size:30px;font-weight:700;margin:8px 0 4px 0;letter-spacing:-0.02em;}
+.kpi-target{font-size:11.5px;color:var(--ink-faint);line-height:1.55;}
+.kpi-tag{display:inline-block;margin-top:8px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;}
+.tag-good{background:var(--teal-soft);color:var(--teal);}
+.tag-warn{background:var(--amber-soft);color:var(--amber);}
+.tag-bad{background:var(--red-soft);color:var(--red);}
+
+.btn{padding:9px 16px;border-radius:8px;border:1px solid transparent;font-size:13px;font-weight:600;transition:all .12s ease;}
+.btn-primary{background:var(--primary);color:#fff;}
+.btn-primary:hover{background:var(--primary-dark);}
+.btn-primary:disabled{background:#B9C2CE;cursor:not-allowed;}
+.btn-ghost{background:var(--surface);color:var(--ink);border-color:var(--border);}
+.btn-ghost:hover{background:var(--surface-2);}
+.btn-danger{background:var(--red-soft);color:var(--red);}
+.btn-danger:hover{background:#f6d3d0;}
+.btn-sm{padding:6px 11px;font-size:12px;border-radius:6px;}
+
+.banner{padding:11px 15px;border-radius:8px;font-size:12.5px;display:flex;align-items:center;gap:9px;margin-bottom:16px;}
+.banner-info{background:var(--primary-soft);color:var(--primary-dark);}
+.banner-warn{background:var(--amber-soft);color:#8A5A14;}
+.banner-danger{background:var(--red-soft);color:#8A2E27;}
+.banner-good{background:var(--teal-soft);color:#155F4E;}
+
+/* floor map */
+.floor-toolbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;}
+.date-tabs{display:flex;gap:6px;background:var(--surface-2);padding:4px;border-radius:9px;}
+.date-tab{padding:7px 13px;border-radius:6px;border:none;background:none;font-size:12.5px;font-weight:400;color:var(--ink-soft);}
+.date-tab.active{background:var(--surface);color:var(--primary);box-shadow:var(--shadow);}
+.date-tab .d-num{display:block;font-family:inherit;font-size:14px;font-weight:400;}
+.floor-select{display:flex;gap:8px;}
+.floor-chip{padding:7px 13px;border-radius:7px;font-size:12.5px;font-weight:600;border:1px solid var(--border);background:var(--surface);}
+.floor-chip.active{border-color:var(--primary);color:var(--primary);background:var(--primary-soft);}
+.floor-chip.disabled{color:var(--ink-faint);opacity:.6;cursor:not-allowed;}
+
+.route-trail{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:16px;font-size:12.5px;}
+.route-crumb{padding:5px 10px;border-radius:6px;color:var(--ink-soft);font-weight:400;background:var(--surface-2);}
+.route-crumb.is-link{cursor:pointer;color:var(--primary);background:var(--primary-soft);}
+.route-crumb.is-link:hover{text-decoration:underline;}
+.route-crumb.is-current{color:var(--ink);background:var(--surface);border:1px solid var(--primary);}
+.route-crumb.is-pending{color:var(--ink-faint);background:none;border:1px dashed var(--border);}
+.route-sep{color:var(--ink-faint);font-size:11px;}
+
+.workspace-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:8px;}
+.workspace-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);text-align:left;cursor:pointer;}
+.workspace-card:hover{border-color:var(--primary);background:var(--primary-soft);}
+.workspace-card-title{font-weight:600;font-size:14px;letter-spacing:0;margin-bottom:4px;}
+.workspace-card-meta{font-size:11.5px;color:var(--ink-faint);line-height:1.55;}
+.workspace-back{background:none;border:none;color:var(--primary);font-weight:600;font-size:12.5px;cursor:pointer;padding:0;margin-bottom:14px;display:inline-flex;align-items:center;gap:4px;}
+.workspace-back:hover{text-decoration:underline;}
+.step-hint{margin-bottom:12px;color:var(--ink-soft);font-size:12.5px;line-height:1.65;}
+
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px;font-size:12px;color:var(--ink-soft);}
+.legend-item{display:flex;align-items:center;gap:6px;}
+.legend-swatch{width:11px;height:11px;border-radius:3px;}
+
+.zones{display:flex;flex-direction:column;gap:18px;}
+.zone{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);}
+.zone-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.zone-title{font-weight:600;font-size:14px;letter-spacing:0;}
+.zone-meta{font-size:11.5px;color:var(--ink-faint);letter-spacing:.01em;}
+.seat-row{display:grid;grid-template-columns:repeat(10, 1fr);gap:8px;}
+.seat{
+  width:100%;aspect-ratio:1.05/1;min-width:0;border-radius:8px;border:1.5px solid transparent;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  font-size:10.5px;font-weight:400;position:relative;transition:transform .1s ease;
+}
+.seat:hover{transform:translateY(-2px);}
+.seat .s-id{font-family:inherit;font-size:10px;}
+.seat .s-status{font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;}
+.seat-available{background:var(--teal-soft);color:var(--teal);border-color:#BEE6DA;cursor:pointer;}
+.seat-available:hover{border-color:var(--teal);}
+.seat-held{background:var(--amber-soft);color:var(--amber);border-color:#F0D2A0;cursor:not-allowed;}
+.seat-occupied{background:var(--primary-soft);color:var(--primary);border-color:#C3D2E6;cursor:not-allowed;}
+.seat-vip{background:var(--purple-soft);color:var(--purple);border-color:#D9CBEA;cursor:not-allowed;}
+.seat-oos{background:repeating-linear-gradient(45deg,#FBE6E4,#FBE6E4 5px,#f6d3d0 5px,#f6d3d0 10px);color:var(--red);border-color:#EFC1BC;cursor:not-allowed;}
+.seat-mine{outline:2px solid var(--primary);outline-offset:1px;}
+.seat-selected{outline:3px solid var(--teal);outline-offset:2px;background:#CBEFE5;}
+
+/* modal */
+.modal-backdrop{position:fixed;inset:0;background:rgba(15,20,28,.5);display:none;align-items:center;justify-content:center;z-index:150;}
+.modal-backdrop.active{display:flex;}
+.modal{width:400px;max-width:92vw;background:#fff;border-radius:14px;padding:24px 24px 20px 24px;box-shadow:0 20px 60px rgba(0,0,0,.3);position:relative;display:flex;flex-direction:column;max-height:88vh;}
+.modal.modal-wide{width:680px;}
+.modal-scroll{overflow-y:auto;min-height:0;padding-right:2px;}
+.modal-close-x{position:absolute;top:14px;right:14px;width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:var(--surface-2);color:var(--ink-soft);font-size:13px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2;padding:0;}
+.modal-close-x:hover{border-color:var(--red);color:var(--red);}
+.modal h3{margin:0 4px 4px 0;font-size:18px;font-weight:700;padding-right:28px;}
+.modal p.sub{margin:0 0 16px 0;color:var(--ink-soft);font-size:12.5px;line-height:1.65;}
+.split-modal{display:flex;gap:0;margin-top:6px;}
+.split-left{flex:1 1 50%;padding-right:20px;min-width:0;}
+.split-right-heading{font-size:11px;font-weight:400;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.03em;margin:0 0 8px;}
+.split-right{flex:1 1 50%;padding-left:20px;border-left:1px solid var(--border);min-width:0;display:flex;flex-direction:column;}
+@media(max-width:640px){
+  .split-modal{flex-direction:column;}
+  .split-left{padding-right:0;}
+  .split-right{border-left:none;border-top:1px solid var(--border);padding-left:0;padding-top:16px;margin-top:16px;}
+}
+.modal-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:12.5px;line-height:1.55;gap:16px;}
+.modal-row:last-of-type{border-bottom:none;}
+.modal-actions{display:flex;gap:8px;margin-top:18px;}
+.modal-actions .btn{flex:1;}
+.modal-sim{margin-top:12px;padding-top:12px;border-top:1px dashed var(--border);}
+.modal-sim button{width:100%;}
+
+.dur-mode-row{display:flex;gap:6px;margin:14px 0 10px;flex-wrap:wrap;}
+.dur-mode-btn{
+  flex:1 1 auto;min-width:80px;border:1px solid var(--border);background:var(--surface-2);color:var(--ink-soft);
+  font-size:11.5px;font-weight:400;padding:8px 10px;border-radius:8px;text-align:center;
+}
+.dur-mode-btn:hover{border-color:var(--primary);color:var(--primary);}
+.dur-mode-btn.active{background:var(--primary);border-color:var(--primary);color:#fff;}
+.dur-half-row{display:flex;gap:6px;margin-bottom:12px;}
+.dur-half-row .dur-mode-btn{font-size:11px;}
+.dur-range-row{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+.dur-range-row label{flex:1 1 auto;font-size:11px;font-weight:400;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.03em;display:flex;flex-direction:column;gap:5px;min-width:130px;}
+.dur-range-row input{padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:12.5px;color:var(--ink);}
+.dur-preview{max-height:150px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;margin-top:10px;}
+.dur-preview-row{display:flex;justify-content:space-between;padding:7px 11px;font-size:11.5px;border-bottom:1px solid var(--border);}
+.dur-preview-row:last-child{border-bottom:none;}
+.dur-preview-row.ok{color:var(--ink);}
+.dur-preview-row.ok span:last-child{color:var(--teal);font-weight:400;}
+.dur-preview-row.blocked{color:var(--ink-faint);}
+.dur-preview-row.blocked span:last-child{color:var(--red);font-weight:400;}
+.dur-preview-toggle{margin-top:10px;width:100%;padding:8px 10px;border:1px dashed var(--border);border-radius:8px;background:var(--surface);color:var(--ink-soft);font-size:11.5px;cursor:pointer;text-align:center;}
+.dur-preview-toggle:hover{border-color:var(--primary);color:var(--primary);}
+.weekday-picker{display:flex;align-items:center;gap:8px;margin:2px 0 12px;flex-wrap:wrap;}
+.weekday-picker-label{font-size:11px;font-weight:400;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.03em;flex:0 0 100%;margin-bottom:2px;}
+.weekday-chip{
+  width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:var(--surface-2);
+  color:var(--ink-soft);font-size:12px;font-weight:500;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;
+}
+.weekday-chip:hover:not(:disabled){border-color:var(--primary);color:var(--primary);}
+.weekday-chip.active{background:var(--primary);border-color:var(--primary);color:#fff;}
+.weekday-chip:disabled{opacity:.4;cursor:not-allowed;}
+.booking-target{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-soft);}
+.booking-target select{width:180px;}
+
+/* tables */
+table{width:100%;border-collapse:collapse;font-size:12.5px;line-height:1.55;}
+th{text-align:left;color:var(--ink-soft);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.06em;padding:9px 10px;border-bottom:1px solid var(--border);}
+td{padding:11px 10px;border-bottom:1px solid var(--border);vertical-align:top;}
+tr:last-child td{border-bottom:none;}
+.status-pill{padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;display:inline-block;}
+.pill-held{background:var(--amber-soft);color:var(--amber);}
+.pill-checked{background:var(--teal-soft);color:var(--teal);}
+.pill-cancelled{background:var(--surface-2);color:var(--ink-soft);}
+.pill-noshow{background:var(--red-soft);color:var(--red);}
+.pill-restricted{background:var(--red-soft);color:var(--red);}
+.pill-ok{background:var(--teal-soft);color:var(--teal);}
+
+.empty-state{text-align:center;padding:40px 20px;color:var(--ink-soft);}
+.empty-state .e-icon{font-size:26px;margin-bottom:8px;}
+
+/* toasts */
+#toast-wrap{position:fixed;bottom:20px;right:20px;z-index:300;display:flex;flex-direction:column;gap:8px;}
+.toast{
+  background:#1A2330;color:#fff;padding:12px 16px;border-radius:9px;font-size:12.5px;
+  box-shadow:0 12px 30px rgba(0,0,0,.25);max-width:320px;display:flex;gap:9px;align-items:flex-start;
+  animation:slidein .2s ease;
+}
+@keyframes slidein{from{opacity:0;transform:translateX(20px);}to{opacity:1;transform:translateX(0);}}
+.toast.t-good{border-left:3px solid var(--teal);}
+.toast.t-warn{border-left:3px solid var(--amber);}
+.toast.t-bad{border-left:3px solid var(--red);}
+.toast.t-info{border-left:3px solid #5C8FD6;}
+
+.section-tag{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--primary);margin-bottom:6px;display:block;}
+.subtle-note{font-size:11.5px;color:var(--ink-faint);margin-top:10px;line-height:1.65;}
+.hr-gate{padding:26px;text-align:center;}
+.chart-box{position:relative;height:220px;}
+.two-col{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;}
+@media(max-width:1000px){.two-col{grid-template-columns:1fr;}}
+.rule-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);}
+.rule-row:last-child{border-bottom:none;}
+.rule-row .r-label{font-size:12.5px;font-weight:400;letter-spacing:0;}
+.rule-row .r-desc{font-size:11.5px;color:var(--ink-soft);margin-top:2px;line-height:1.55;}
+input[type=number], select{padding:6px 9px;border:1px solid var(--border);border-radius:6px;font-size:12.5px;width:70px;}
+.footer-note{margin-top:26px;padding-top:14px;border-top:1px solid var(--border);font-size:11px;color:var(--ink-faint);text-align:center;line-height:1.7;letter-spacing:.01em;}
+
+/* --- BOOKING DROPDOWNS --- */
+.booking-dropdown-bar{display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:4px;}
+.booking-dropdown-group{display:flex;flex-direction:column;gap:4px;}
+.booking-dropdown-group label{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);}
+.booking-dropdown-group select{padding:7px 10px;border:1px solid var(--border);border-radius:7px;font-size:13px;min-width:160px;background:var(--surface);color:var(--ink);}
+
+/* --- STATUS FILTER BAR --- */
+.status-filter-bar{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 12px;}
+.filter-btn{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--ink-soft);font-size:12px;font-weight:600;transition:all .12s;}
+.filter-btn:hover{border-color:var(--primary);color:var(--primary);}
+.filter-btn.active{background:var(--primary);border-color:var(--primary);color:#fff;}
+
+/* --- FLOOR LAYOUT (3-COLUMN OFFICE FLOOR PLAN) --- */
+.floor-plan-card{
+  background-color:#E7EDF5;
+  background-image:
+    linear-gradient(rgba(44,72,112,.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(44,72,112,.06) 1px, transparent 1px);
+  background-size:22px 22px;
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:22px;
+  box-shadow:0 2px 4px rgba(20,30,45,.05), 0 18px 44px -24px rgba(20,30,45,.22);
+}
+.floor-layout-container{display:grid;grid-template-columns:170px 26px 1fr 26px 170px;gap:14px;align-items:stretch;margin-top:0;}
+.floor-layout-left,.floor-layout-right{display:flex;flex-direction:column;gap:10px;}
+.floor-layout-center{display:flex;flex-direction:column;gap:12px;}
+.no-cabins{min-height:60px;}
+.floor-walkway{
+  position:relative;border-radius:6px;min-height:100%;
+  background:repeating-linear-gradient(180deg, rgba(44,72,112,.10) 0 9px, transparent 9px 20px);
+  border-left:1px dashed rgba(44,72,112,.18);border-right:1px dashed rgba(44,72,112,.18);
+}
+.floor-walkway::after{
+  content:'WALKWAY';writing-mode:vertical-rl;text-orientation:mixed;
+  font-size:9px;letter-spacing:.18em;font-weight:700;color:var(--ink-faint);
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(180deg);
+}
+@media(max-width:900px){.floor-layout-container{grid-template-columns:120px 18px 1fr 18px 120px;}}
+@media(max-width:700px){
+  .floor-layout-container{grid-template-columns:1fr;gap:10px;}
+  .floor-layout-left,.floor-layout-right{flex-direction:row;flex-wrap:wrap;}
+  .floor-layout-left .cabin-room,.floor-layout-right .cabin-room{flex:1 1 130px;}
+  .floor-walkway{display:none;}
+}
+
+/* --- CABIN ROOMS --- */
+.cabin-room{
+  background:var(--surface);border:1.5px dashed var(--border);border-radius:10px;
+  padding:14px 12px;text-align:center;cursor:pointer;
+  transition:border-color .12s, background .12s;min-height:80px;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px;
+  box-shadow:0 1px 2px rgba(20,30,45,.05);
+}
+.cabin-room:hover:not(.cabin-blocked):not(.cabin-dimmed){border-color:var(--primary);background:var(--primary-soft);}
+.cabin-blocked{background:repeating-linear-gradient(45deg,#fef2f2,#fef2f2 6px,#fee2e2 6px,#fee2e2 12px);border-color:var(--red);cursor:not-allowed;}
+.cabin-dimmed{opacity:.25;pointer-events:none;}
+.cabin-name{font-size:11.5px;font-weight:600;color:var(--ink);letter-spacing:0;}
+.cabin-status{font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint);}
+.cabin-legend-swatch{width:11px;height:11px;border-radius:3px;background:var(--surface);border:1.5px dashed var(--border);}
+
+/* --- SEAT DIMMED (filter off) --- */
+.seat-dimmed{opacity:.18;pointer-events:none;}
+
+/* --- HR MANAGEMENT TABS --- */
+.hr-tab-bar{display:flex;gap:2px;background:var(--surface-2);border-radius:9px;padding:4px;margin-bottom:20px;flex-wrap:wrap;}
+.hr-tab{padding:8px 16px;border-radius:6px;border:none;background:none;font-size:12.5px;color:var(--ink-soft);cursor:pointer;font-family:inherit;}
+.hr-tab.active{background:var(--surface);color:var(--primary);box-shadow:var(--shadow);}
+.hr-form-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:14px;}
+.hr-form-group{display:flex;flex-direction:column;gap:4px;flex:1;min-width:140px;}
+.hr-form-group label{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);}
+.hr-form-group input,.hr-form-group select{padding:9px 11px;border:1px solid var(--border);border-radius:7px;font-size:13px;font-family:inherit;width:100%;}
+.pill-blocked{background:var(--red-soft);color:var(--red);}
+.pill-maintenance{background:var(--amber-soft);color:var(--amber);}
+/* =========================================================
+   MOBILE / RESPONSIVE
+========================================================= */
+.mobile-menu-btn{
+  display:none;align-items:center;justify-content:center;
+  width:34px;height:34px;border-radius:8px;border:1px solid var(--border);
+  background:var(--surface);color:var(--ink);font-size:16px;flex-shrink:0;margin-right:10px;
+}
+.mobile-menu-btn:hover{background:var(--surface-2);}
+.mobile-nav-backdrop{display:none;position:fixed;inset:0;background:rgba(15,20,28,.5);z-index:240;}
+.mobile-nav-backdrop.active{display:block;}
+.rail-close-btn{display:none;}
+
+@media(max-width:860px){
+  .mobile-menu-btn{display:flex;}
+  #app.active{position:relative;}
+  .rail{
+    position:fixed;top:0;bottom:0;left:0;z-index:250;
+    width:264px;max-width:82vw;
+    transform:translateX(-100%);
+    transition:transform .22s ease;
+    box-shadow:0 0 40px rgba(0,0,0,.35);
+  }
+  .rail.mobile-open{transform:translateX(0);}
+  .rail-close-btn{
+    display:flex;align-items:center;justify-content:center;
+    width:28px;height:28px;border-radius:7px;border:1px solid var(--rail-line);
+    background:transparent;color:#C9D2DC;font-size:13px;margin-left:auto;
+  }
+  .rail-close-btn:hover{background:var(--rail-soft);color:#fff;}
+  .rail-brand{justify-content:space-between;}
+
+  .main{width:100%;}
+  .topbar{padding:0 14px;gap:8px;}
+  .topbar-title{font-size:15.5px;max-width:76px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0;}
+  .content{padding:16px 14px 48px;}
+
+  .global-search-wrap{margin:0;max-width:none;flex:1 1 auto;min-width:0;}
+  .global-search-input{font-size:16px;padding:8px 30px 8px 30px;}
+  .global-search-icon{left:9px;font-size:11px;}
+  .global-search-clear{right:6px;}
+
+  .user-chip{padding:5px 6px;}
+  .user-chip > div:not(.user-avatar){display:none;}
+  .notif-bell{width:32px;height:32px;font-size:14px;}
+  .notif-panel{right:-8px;width:320px;}
+
+  .grid-4,.grid-3,.grid-2{grid-template-columns:1fr;}
+  .kpi-value{font-size:26px;}
+
+  .booking-dropdown-bar{padding:12px 14px;}
+  .booking-dropdown-group select{min-width:0;width:100%;}
+  .floor-toolbar{gap:10px;}
+  .date-tabs{overflow-x:auto;max-width:100%;}
+
+  .workspace-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));}
+
+  .zone{padding:14px 12px;overflow-x:auto;}
+  .seat-row{grid-template-columns:repeat(10,54px);gap:6px;}
+
+  .modal{padding:20px 18px 16px;}
+
+  .content .card:has(table){overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .content table{min-width:560px;}
+}
+
+@media(max-width:480px){
+  .topbar-title{font-size:14px;max-width:46px;}
+  .global-search-input{padding:8px 26px 8px 26px;}
+  .kpi-value{font-size:23px;}
+  .login-form-card{padding:24px 20px;}
+  .login-brand h1{font-size:26px;}
+  .modal{max-width:96vw;}
+  .seat-row{grid-template-columns:repeat(10,48px);}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen"></div>
+
+<!-- APP -->
+<div id="app">
+  <div class="rail" id="appRail">
+    <div class="rail-brand">
+      <div class="rail-mark">SW</div>
+      <div>
+        <div class="rail-brand-text">Sparity Workspace</div>
+        <div class="rail-brand-sub">Madhapur, Hyderabad</div>
+      </div>
+      <button class="rail-close-btn" onclick="closeMobileNav()" title="Close menu">✕</button>
+    </div>
+
+    <div class="rail-nav" id="railNav"></div>
+
+    <div class="rail-spacer"></div>
+
+    <div class="rail-persona">
+      <div class="persona-label">Demo · switch persona</div>
+      <button class="persona-btn" data-role="employee" onclick="switchPersona('employee')"><span class="persona-dot"></span> Employee — Praphul</button>
+      <button class="persona-btn" data-role="rahul" onclick="switchPersona('rahul')"><span class="persona-dot"></span> Employee — Rahul (Evening)</button>
+      <button class="persona-btn" data-role="manager" onclick="switchPersona('manager')"><span class="persona-dot"></span> Manager — Meera</button>
+      <button class="persona-btn" data-role="hr" onclick="switchPersona('hr')"><span class="persona-dot"></span> HR — Ayesha</button>
+    </div>
+
+    <div class="rail-clock" id="officeEntryBox">
+      <!-- populated by renderOfficeEntryBox() -->
+    </div>
+
+    <div class="rail-clock">
+      Simulated office clock
+      <div class="rail-clock-time mono" id="clockDisplay">--:--</div>
+      <button class="rail-clock-btn" onclick="advanceClock()">⏩ Advance +30 min</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <button class="mobile-menu-btn" onclick="toggleMobileNav()" title="Open menu">☰</button>
+      <div class="topbar-title" id="viewTitle">Book a Seat</div>
+      <div class="global-search-wrap" id="globalSearchWrap">
+        <span class="global-search-icon">🔎</span>
+        <input type="text" id="globalSearchInput" class="global-search-input"
+               placeholder="Search employees, buildings, or seat IDs…"
+               oninput="onGlobalSearch(this.value)"
+               onfocus="onGlobalSearch(this.value)">
+        <button class="global-search-clear" id="globalSearchClearBtn" onclick="clearGlobalSearch()" style="display:none;">✕</button>
+        <div class="global-search-results" id="globalSearchResults"></div>
+      </div>
+      <div class="topbar-right">
+        <div class="notif-wrap" id="notifWrap">
+          <button class="notif-bell" id="notifBellBtn" onclick="toggleNotifPanel(event)" title="Notifications">
+            🔔
+            <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+          </button>
+          <div class="notif-panel" id="notifPanel">
+            <div class="notif-panel-header">
+              <div>
+                <div class="np-title">Notifications</div>
+                <div class="np-role" id="notifRoleLabel">Engineering · Employee</div>
+              </div>
+              <button class="notif-mark-all" onclick="markAllNotifsRead()">Mark all read</button>
+            </div>
+            <div class="notif-list" id="notifList"></div>
+          </div>
+        </div>
+        <button class="user-chip" onclick="openAccountMenu()" title="Account options">
+          <div class="user-avatar" id="userAvatar">PP</div>
+          <div>
+            <div id="userName" style="font-weight:400;color:var(--ink);">Praphul Parinam</div>
+            <div id="userRole" style="font-size:11px;">Engineering · Employee</div>
+          </div>
+        </button>
+      </div>
+    </div>
+    <div class="content" id="content">
+      <div class="view active" id="view-booking"></div>
+      <div class="view" id="view-mybookings"></div>
+      <div class="view" id="view-hr"></div>
+      <div class="view" id="view-reports"></div>
+    </div>
+  </div>
+</div>
+
+<div class="mobile-nav-backdrop" id="mobileNavBackdrop" onclick="closeMobileNav()"></div>
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal" id="modalShell">
+    <button type="button" class="modal-close-x" onclick="closeModal()" aria-label="Close">✕</button>
+    <div class="modal-scroll" id="modalBody"></div>
+  </div>
+</div>
+<div class="modal-backdrop" id="shiftEndBackdrop" style="z-index:170;">
+  <div class="modal" id="shiftEndShell">
+    <div class="modal-scroll" id="shiftEndBody"></div>
+  </div>
+</div>
+<div id="toast-wrap"></div>
+
+<script>
+/* =========================================================
+   DATA MODEL
+========================================================= */
+const TODAY = new Date(2026,6,27,8,30); // Mon Jul 27 2026, 08:30 sim start
+let simTime = new Date(TODAY);
+
+function isoDate(d){
+  const year = d.getFullYear();
+  const month = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return `${year}-${month}-${day}`;
+}
+function weekDates(){
+  // Next 7 consecutive calendar days starting from TODAY
+  const arr=[];
+  for(let i=0;i<7;i++){
+    const d=new Date(TODAY); d.setDate(TODAY.getDate()+i);
+    arr.push(d);
+  }
+  return arr;
+}
+const WEEK = weekDates();
+let selectedDate = isoDate(WEEK[0]);
+let checkinDeadlineHour = 10; // configurable via admin
+let maxBookingsPerWeek = 5;
+
+// Office entry simulation: a booking can only be checked in to once the employee has
+// "scanned" their ID card / biometric at the office entrance for the day. This mirrors a
+// real badge-in/biometric gate feeding the booking system. Keyed by empId -> {date: time}.
+let officeCheckins = {};
+
+// Booking roadmap: Company -> Location -> Building -> Floor -> Workspace -> Seat
+// Only Madhapur is offered as a location for now; no other locations are shown.
+const ORG_COMPANY = 'Sparity';
+const LOCATIONS = ['Madhapur'];
+const BUILDINGS = ['Building 1','Building 2','Building 3'];
+const FLOORS = ['Floor 1','Floor 2','Floor 3'];
+
+let bookingStep = 'location'; // 'location' -> 'building' -> 'floor' -> 'workspace' -> 'seat'
+let selectedLocation = null;
+let selectedBuilding = null;
+let selectedFloorName = null;
+let selectedWorkspace = null;
+let lastConfirmedBooking = null; // used to show the confirmation screen in the modal
+
+// Notification bell: seeded per role with the kinds of pop-up events each role
+// commonly sees in the app (booking confirmations, approvals, HR/admin alerts…),
+// plus every live toast() fired during the session is also logged here for the
+// role that was active at the time.
+let notifSeq = 1000;
+const notifications = {
+  employee: [
+    {id:notifSeq++, type:'good', icon:'✅', msg:'Seat A-104 confirmed for tomorrow, 9:00 AM – 6:00 PM.', time:'10 min ago', read:false},
+    {id:notifSeq++, type:'info', icon:'ℹ️', msg:'Reminder: scan your ID card at the office entry before check-in.', time:'55 min ago', read:false},
+    {id:notifSeq++, type:'warn', icon:'⚠️', msg:'Check-in window closes at 10:00 AM — check in soon to avoid losing your seat.', time:'2 hr ago', read:true},
+    {id:notifSeq++, type:'good', icon:'✅', msg:'Your cabin request for Discussion Room 2 was approved by HR.', time:'Yesterday', read:true},
+    {id:notifSeq++, type:'bad', icon:'⛔', msg:'A held seat was auto-released after a missed check-in window.', time:'Yesterday', read:true}
+  ],
+  rahul: [
+    {id:notifSeq++, type:'info', icon:'ℹ️', msg:'Welcome — you\'re on the Evening shift (1:00 PM – 9:00 PM), Building 1 · Floor 3.', time:'1 hr ago', read:false},
+    {id:notifSeq++, type:'info', icon:'ℹ️', msg:'Reminder: scan your ID card at the office entry before check-in.', time:'2 hr ago', read:true}
+  ],
+  manager: [
+    {id:notifSeq++, type:'info', icon:'ℹ️', msg:'2 cabin requests from your team are awaiting HR approval.', time:'20 min ago', read:false},
+    {id:notifSeq++, type:'good', icon:'✅', msg:'Team booking completed — 5 seats booked for Engineering, Mon–Fri.', time:'1 hr ago', read:false},
+    {id:notifSeq++, type:'warn', icon:'⚠️', msg:'Praphul Parinam: 3 no-shows in a rolling period — booking access suspended for 1 week.', time:'3 hr ago', read:true},
+    {id:notifSeq++, type:'info', icon:'ℹ️', msg:'Weekly seat utilization report for Engineering is ready.', time:'Yesterday', read:true}
+  ],
+  hr: [
+    {id:notifSeq++, type:'good', icon:'✅', msg:'New employee added successfully.', time:'15 min ago', read:false},
+    {id:notifSeq++, type:'warn', icon:'⚠️', msg:'Auto-release: 4 seat(s) reclaimed after missed check-in windows today.', time:'45 min ago', read:false},
+    {id:notifSeq++, type:'info', icon:'ℹ️', msg:'Floor 3, Building 2 layout updated — all seats start Blocked.', time:'2 hr ago', read:true},
+    {id:notifSeq++, type:'bad', icon:'⛔', msg:'An employee was flagged — 3 no-shows in a rolling period.', time:'Yesterday', read:true},
+    {id:notifSeq++, type:'good', icon:'✅', msg:'Cabin request for Discussion Room 2 approved.', time:'Yesterday', read:true}
+  ]
+};
+
+const personas = {
+  employee: {id:'praphul', name:'Praphul Parinam', dept:'Engineering', initials:'PP', roleLabel:'Engineering · Employee'},
+  rahul: {id:'rahul', name:'Rahul Sharma', dept:'Engineering', initials:'RS', roleLabel:'Engineering · Employee (Evening)'},
+  manager: {id:'meera', name:'Meera Nair', dept:'Engineering', initials:'MN', roleLabel:'Engineering · Manager'},
+  hr: {id:'ayesha', name:'Ayesha Khan', dept:'HR', initials:'AK', roleLabel:'HR Business Partner'}
+};
+let currentRole = 'employee';
+let bookingTargetEmpId = 'praphul';
+let selectedTeamSeats = [];
+
+const TEAMS = ['Team Meera','Team Ayesha','Design Team','Sales Team','Ops Team','Leadership','Unassigned'];
+
+let employees = [
+  {id:'praphul', name:'Praphul Parinam', dept:'Engineering', team:'Team Meera', noShow:0, restrictedUntil:null, assignedBuilding:'Building 1', assignedFloor:'Floor 3', shift:'normal'},
+  {id:'meera', name:'Meera Nair', dept:'Engineering', team:'Team Meera', noShow:0, restrictedUntil:null, assignedBuilding:'Building 1', assignedFloor:'Floor 3', shift:'normal'},
+  {id:'ayesha', name:'Ayesha Khan', dept:'HR', team:'Team Ayesha', noShow:0, restrictedUntil:null, assignedBuilding:'Building 1', assignedFloor:'Floor 3', shift:'normal'},
+  {id:'sneha', name:'Sneha Rao', dept:'Engineering', team:'Team Meera', noShow:1, restrictedUntil:null, assignedBuilding:'Building 1', assignedFloor:'Floor 2', shift:'morning'},
+  {id:'kiran', name:'Kiran Patel', dept:'Engineering', team:'Team Meera', noShow:2, restrictedUntil:null, assignedBuilding:'Building 2', assignedFloor:'Floor 1', shift:'normal'},
+  {id:'divya', name:'Divya Menon', dept:'Design', team:'Design Team', noShow:0, restrictedUntil:null, assignedBuilding:'Building 2', assignedFloor:'Floor 2', shift:'evening'},
+  {id:'arjun', name:'Arjun Mehta', dept:'Sales', team:'Sales Team', noShow:0, restrictedUntil:null, assignedBuilding:'Building 3', assignedFloor:'Floor 1', shift:'normal'},
+  {id:'farhan', name:'Farhan Ali', dept:'Ops', team:'Ops Team', noShow:3, restrictedUntil:isoDate(WEEK[4]), assignedBuilding:'Building 3', assignedFloor:'Floor 2', shift:'night'},
+  {id:'neha', name:'Neha Verma', dept:'Engineering', team:'Team Meera', noShow:0, restrictedUntil:null, assignedBuilding:'Building 1', assignedFloor:'Floor 1', shift:'normal'},
+  {id:'rahul', name:'Rahul Sharma', dept:'Engineering', team:'Team Meera', noShow:0, restrictedUntil:null, assignedBuilding:'Building 1', assignedFloor:'Floor 3', shift:'evening'},
+];
+
+
+// seatType: 'normal' | 'cabin' | 'blocked'
+// seatStatus (HR-managed): 'available' | 'blocked' | 'maintenance'
+function zoneSeats(prefix,count,zone,dept,building,floor,location,reservedCount=0,oosIndexes=[],seatType='normal',blockedIndexes=[]){
+  const s=[];
+  for(let i=1;i<=count;i++){
+    const isReserved = i<=reservedCount;
+    const isOos = oosIndexes.includes(i);
+    const isBlocked = blockedIndexes.includes(i);
+    s.push({
+      id:`${prefix}-${String(i).padStart(2,'0')}`,
+      zone, dept, building, floor, location,
+      reserved: isReserved,
+      oos: isOos,
+      seatType: isReserved ? 'cabin' : seatType,
+      hrStatus: isBlocked ? 'blocked' : isOos ? 'maintenance' : 'available'
+    });
+  }
+  return s;
+}
+
+// Cabin room definitions for the visual layout
+const CABIN_ROOMS = {
+  'Building 1': {
+    'Floor 3': [
+      {id:'CAB-REF', name:'Ref Room', side:'left', seatType:'cabin', hrStatus:'available'},
+      {id:'CAB-BOOL', name:'Boolean Room', side:'left', seatType:'cabin', hrStatus:'available'},
+      {id:'CAB-STRING', name:'String Room', side:'right', seatType:'cabin', hrStatus:'available'},
+      {id:'CAB-FLOAT', name:'Float Room', side:'right', seatType:'cabin', hrStatus:'available'},
+      {id:'CAB-STORE', name:'Store Room', side:'right', seatType:'cabin', hrStatus:'available'},
+      {id:'CAB-CEO', name:'CEO Room', side:'right', seatType:'cabin', hrStatus:'blocked'},
+    ]
+  }
+};
+let cabinRooms = JSON.parse(JSON.stringify(CABIN_ROOMS));
+// Every zone row now has exactly 10 seats (COUNT), so the layout always renders
+// uniform 10-seat rows instead of the old mismatched 4/6/7/8/12-seat rows.
+const ROW_COUNT = 10;
+const FLOOR_LAYOUTS = {
+  'Building 1': {
+    'Floor 1': [
+      {prefix:'B1F1-ENGA', count:ROW_COUNT, zone:'Orion Pod', dept:'Engineering'},
+      {prefix:'B1F1-ENGB', count:ROW_COUNT, zone:'Atlas Pod', dept:'Engineering'},
+      {prefix:'B1F1-DSGN', count:ROW_COUNT, zone:'Pixel Studio', dept:'Design'},
+      {prefix:'B1F1-SALE', count:ROW_COUNT, zone:'Revenue Bay', dept:'Sales'},
+      {prefix:'B1F1-OPS', count:ROW_COUNT, zone:'Support Cove', dept:'Ops'},
+      {prefix:'B1F1-VIP', count:ROW_COUNT, zone:'Summit Suites', dept:'Leadership', reservedCount:4}
+    ],
+    'Floor 2': [
+      {prefix:'B1F2-ENGA', count:ROW_COUNT, zone:'Nimbus Pod', dept:'Engineering'},
+      {prefix:'B1F2-QA', count:ROW_COUNT, zone:'Velocity QA Lab', dept:'Engineering'},
+      {prefix:'B1F2-DSGN', count:ROW_COUNT, zone:'Canvas Corner', dept:'Design', oosIndexes:[3]},
+      {prefix:'B1F2-OPS', count:ROW_COUNT, zone:'Ops Bridge', dept:'Ops'},
+      {prefix:'B1F2-LDR', count:ROW_COUNT, zone:'Leadership Deck', dept:'Leadership', reservedCount:3}
+    ],
+    'Floor 3': [
+      {prefix:'B1F3-ENGA', count:ROW_COUNT, zone:'Turing Pod', dept:'Engineering'},
+      {prefix:'B1F3-ENGB', count:ROW_COUNT, zone:'Ada Pod', dept:'Engineering', oosIndexes:[5]},
+      {prefix:'B1F3-HR', count:ROW_COUNT, zone:'People Hub', dept:'HR'},
+      {prefix:'B1F3-OPS', count:ROW_COUNT, zone:'Control Point', dept:'Ops'},
+      {prefix:'B1F3-VIP', count:ROW_COUNT, zone:'Executive Row', dept:'Leadership', reservedCount:4}
+    ]
+  },
+  'Building 2': {
+    'Floor 1': [
+      {prefix:'B2F1-ENG', count:ROW_COUNT, zone:'Helix Pod', dept:'Engineering'},
+      {prefix:'B2F1-SAL', count:ROW_COUNT, zone:'Growth Bay', dept:'Sales'},
+      {prefix:'B2F1-OPS', count:ROW_COUNT, zone:'Pulse Ops', dept:'Ops'},
+      {prefix:'B2F1-MTG', count:ROW_COUNT, zone:'Client Demo Pods', dept:'Sales'}
+    ],
+    'Floor 2': [
+      {prefix:'B2F2-ENG', count:ROW_COUNT, zone:'Quantum Pod', dept:'Engineering'},
+      {prefix:'B2F2-DSG', count:ROW_COUNT, zone:'Sketch Lab', dept:'Design'},
+      {prefix:'B2F2-FIN', count:ROW_COUNT, zone:'Finance Nook', dept:'Ops'},
+      {prefix:'B2F2-LDR', count:ROW_COUNT, zone:'Board Pods', dept:'Leadership', reservedCount:3}
+    ],
+    'Floor 3': [
+      {prefix:'B2F3-ENG', count:ROW_COUNT, zone:'Vertex Pod', dept:'Engineering'},
+      {prefix:'B2F3-HR', count:ROW_COUNT, zone:'Talent Terrace', dept:'HR'},
+      {prefix:'B2F3-SAL', count:ROW_COUNT, zone:'Pipeline Row', dept:'Sales', oosIndexes:[2]},
+      {prefix:'B2F3-OPS', count:ROW_COUNT, zone:'Service Dock', dept:'Ops'}
+    ]
+  },
+  'Building 3': {
+    'Floor 1': [
+      {prefix:'B3F1-ENG', count:ROW_COUNT, zone:'Fusion Pod', dept:'Engineering'},
+      {prefix:'B3F1-DSG', count:ROW_COUNT, zone:'Brand Atelier', dept:'Design'},
+      {prefix:'B3F1-CAB', count:ROW_COUNT, zone:'Focus Cabins', dept:'Engineering'}
+    ],
+    'Floor 2': [
+      {prefix:'B3F2-ENG', count:ROW_COUNT, zone:'Orbit Pod', dept:'Engineering'},
+      {prefix:'B3F2-SAL', count:ROW_COUNT, zone:'Terrace Sales Hub', dept:'Sales'},
+      {prefix:'B3F2-OPS', count:ROW_COUNT, zone:'Response Ring', dept:'Ops'},
+      {prefix:'B3F2-LDR', count:ROW_COUNT, zone:'Partner Suites', dept:'Leadership', reservedCount:2}
+    ],
+    'Floor 3': [
+      {prefix:'B3F3-ENG', count:ROW_COUNT, zone:'Matrix Pod', dept:'Engineering'},
+      {prefix:'B3F3-INC', count:ROW_COUNT, zone:'Innovation Garage', dept:'Engineering'},
+      {prefix:'B3F3-HR', count:ROW_COUNT, zone:'Culture Corner', dept:'HR'},
+      {prefix:'B3F3-OPS', count:ROW_COUNT, zone:'Command Booth', dept:'Ops', oosIndexes:[1]}
+    ]
+  }
+};
+const workspaceMeta = {};
+let seats = BUILDINGS.flatMap(building =>
+  FLOORS.flatMap(floor =>
+    (FLOOR_LAYOUTS[building][floor] || []).flatMap(cfg=>{
+      workspaceMeta[cfg.zone] = `${cfg.dept} · ${building} · ${floor}`;
+      return zoneSeats(cfg.prefix, cfg.count, cfg.zone, cfg.dept, building, floor, LOCATIONS[0], cfg.reservedCount || 0, cfg.oosIndexes || []);
+    })
+  )
+);
+
+let bookingSeq = 1042;
+let groupSeq = 1;
+let bookings = []; // {id, seatId, empId, date, status, createdAt, checkinDeadline, groupId, slotLabel, startTime, endTime}
+
+// Shared start-time/duration options, used by cabin room bookings.
+const MEETING_START_TIMES = [
+  '09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30',
+  '13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30'
+];
+const MEETING_DURATION_OPTIONS = [
+  {value:30, label:'30 min'},
+  {value:60, label:'1 hour'},
+  {value:90, label:'1.5 hours'},
+  {value:120, label:'2 hours'},
+  {value:180, label:'3 hours'}
+];
+
+// Cabin room bookings reuse the same start-time/duration picker.
+let cabinRoomBookings = []; // {id, cabinId, date, startTime, endTime, bookedBy, attendeeIds}
+let cabinRoomSeq = 1;
+let pendingCabinRoom = null;
+let cabinRoomStartTime = '09:00';
+let cabinRoomDuration = 60;
+let cabinRoomConfirmed = false;
+let pendingCabinTeamMembers = []; // empIds invited to the meeting room booking
+let cabinMeetingName = '';
+let cabinMeetingReason = '';
+let cabinTeamSearchTerm = '';
+
+const SHIFTS = {
+  normal:  {label:'Normal',  start:'09:00', end:'17:00'},
+  morning: {label:'Morning', start:'05:00', end:'13:00'},
+  evening: {label:'Evening', start:'13:00', end:'21:00'},
+  night:   {label:'Night',   start:'21:00', end:'05:00'},
+};
+const SHIFT_ORDER = ['normal','morning','evening','night'];
+// Total length of a shift in hours (handles overnight shifts like Night 21:00–05:00)
+function shiftDurationHours(slot){
+  const [sh,sm] = slot.start.split(':').map(Number);
+  const [eh,em] = slot.end.split(':').map(Number);
+  let startMin = sh*60+sm, endMin = eh*60+em;
+  if(endMin <= startMin) endMin += 24*60; // crosses midnight
+  return (endMin-startMin)/60;
+}
+// Adds N hours to a "HH:MM" time string, wrapping past midnight
+function addHoursToTime(startStr, hours){
+  const [sh,sm] = startStr.split(':').map(Number);
+  let totalMin = Math.round(sh*60+sm + hours*60);
+  totalMin = ((totalMin % 1440) + 1440) % 1440;
+  const hh = String(Math.floor(totalMin/60)).padStart(2,'0');
+  const mm = String(totalMin%60).padStart(2,'0');
+  return `${hh}:${mm}`;
+}
+// Sensible default hours for a half-day booking on a given shift (half the shift, min 1h)
+function defaultHalfDayHours(slot){
+  return Math.max(1, Math.round((shiftDurationHours(slot)/2)*2)/2);
+}
+// Real Date object for when a booking's shift starts/ends on its date (handles overnight shifts)
+function shiftDateTime(dateStr, timeStr, isEnd, startTimeStr){
+  const [h,m] = timeStr.split(':').map(Number);
+  const dt = new Date(dateStr+'T00:00:00'); dt.setHours(h,m,0,0);
+  if(isEnd && startTimeStr){
+    const [sh,sm] = startTimeStr.split(':').map(Number);
+    if(h*60+m <= sh*60+sm) dt.setDate(dt.getDate()+1); // end time is on the next calendar day
+  }
+  return dt;
+}
+
+function mkBooking(seatId,empId,date,status,meta={}){
+  const d = new Date(date+'T00:00:00');
+  const deadline = new Date(d); deadline.setHours(checkinDeadlineHour,0,0,0);
+  const startTime = meta.startTime || SHIFTS.normal.start;
+  const endTime = meta.endTime || SHIFTS.normal.end;
+  bookings.push({
+    id:'BK-'+(bookingSeq++), seatId, empId, date, status,
+    createdAt:new Date(TODAY.getTime()-Math.random()*86400000*2),
+    checkinDeadline: deadline,
+    groupId: meta.groupId || null,
+    slotLabel: meta.slotLabel || SHIFTS.normal.label,
+    startTime, endTime,
+    shiftEndAt: shiftDateTime(date, endTime, true, startTime),
+    notifiedEndingSoon: false, // has the "ending soon" popup already fired for this booking?
+    extended: false // did the employee extend this booking by 1 hour?
+  });
+}
+// No default bookings: seats are held only after a user clicks a booking action.
+const todayStr = isoDate(WEEK[0]);
+const others = ['divya','arjun','farhan','ayesha','ritika'];
+const bookableIds = seats.filter(s=>!s.reserved && !s.oos).map(s=>s.id);
+
+/* =========================================================
+   UTIL
+========================================================= */
+function empById(id){ return employees.find(e=>e.id===id); }
+function personaObj(){ return personas[currentRole]; }
+function bookingTargetObj(){
+  if(currentRole==='manager' && bookingTargetEmpId==='team'){
+    return {id:'team-meera', name:'My team', dept:'Engineering', noShow:0, restrictedUntil:null};
+  }
+  return empById(bookingTargetEmpId) || empById(personaObj().id);
+}
+function managerTeamMembers(){ return employees.filter(e=>e.team==='Team Meera'); }
+function managerTeamBookingIds(){ return ['team-meera', ...managerTeamMembers().map(e=>e.id)]; }
+// Employees eligible to be added as meeting-room team members for the current persona.
+// HR can add anyone; Manager/Employee are limited to the existing team-membership rule used for team bookings.
+function eligibleCabinTeamMembers(){
+  const p = personaObj();
+  const pool = currentRole==='hr' ? employees : managerTeamMembers();
+  return pool.filter(e=>e.id!==p.id);
+}
+function roleForEmpId(empId){
+  return Object.keys(personas).find(role=>personas[role].id===empId) || null;
+}
+function unbookedManagerTeamMembers(date){
+  return managerTeamMembers().filter(e=>!activeBookingsFor(e.id,date)[0] && !(e.restrictedUntil && e.restrictedUntil >= date));
+}
+function activeBookingsFor(empId,date){
+  return bookings.filter(b=>b.empId===empId && b.date===date && (b.status==='held'||b.status==='checked_in'));
+}
+function seatStatusOnDate(seat, date){
+  if(seat.reserved) return 'vip';
+  if(seat.oos) return 'oos';
+  const b = bookings.find(bk=>bk.seatId===seat.id && bk.date===date && (bk.status==='held'||bk.status==='checked_in'));
+  if(!b) return 'available';
+  return b.status==='checked_in' ? 'occupied' : 'held';
+}
+function fmtTime(d){ return d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true}); }
+function fmtDateShort(d){ return d.toLocaleDateString('en-IN',{weekday:'short',day:'2-digit',month:'short'}); }
+function toast(msg,type='info',icon=''){
+  const wrap = document.getElementById('toast-wrap');
+  const el = document.createElement('div');
+  el.className = 't '+'toast t-'+type;
+  const icons={good:'✅',warn:'⚠️',bad:'⛔',info:'ℹ️'};
+  el.innerHTML = `<span>${icon||icons[type]}</span><span>${msg}</span>`;
+  wrap.appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; el.style.transition='opacity .3s'; setTimeout(()=>el.remove(),300); }, 4200);
+  logNotification(msg, type, icon);
+}
+
+/* ---------- Notification bell ---------- */
+function logNotification(msg,type='info',icon=''){
+  if(!currentRole || !notifications[currentRole]) return;
+  const icons={good:'✅',warn:'⚠️',bad:'⛔',info:'ℹ️'};
+  notifications[currentRole].unshift({
+    id:notifSeq++, type, icon:icon||icons[type], msg, time:'Just now', read:false
+  });
+  if(notifications[currentRole].length>30) notifications[currentRole].length = 30;
+  renderNotifBell();
+}
+// Push a notification into an arbitrary role's inbox (used to notify meeting attendees
+// who may not be the persona currently logged in).
+function pushNotifForRole(role, msg, type='info', icon=''){
+  if(!role || !notifications[role]) return;
+  const icons={good:'✅',warn:'⚠️',bad:'⛔',info:'ℹ️'};
+  notifications[role].unshift({
+    id:notifSeq++, type, icon:icon||icons[type], msg, time:'Just now', read:false
+  });
+  if(notifications[role].length>30) notifications[role].length = 30;
+  if(role===currentRole) renderNotifBell();
+}
+function unreadNotifCount(){
+  const list = notifications[currentRole]||[];
+  return list.filter(n=>!n.read).length;
+}
+function renderNotifBell(){
+  const badge = document.getElementById('notifBadge');
+  if(!badge) return;
+  const count = unreadNotifCount();
+  if(count>0){ badge.style.display='block'; badge.textContent = count>9 ? '9+' : String(count); }
+  else{ badge.style.display='none'; }
+  const roleLabel = document.getElementById('notifRoleLabel');
+  if(roleLabel && personas[currentRole]) roleLabel.textContent = personas[currentRole].roleLabel;
+  renderNotifList();
+}
+function renderNotifList(){
+  const listEl = document.getElementById('notifList');
+  if(!listEl) return;
+  const list = notifications[currentRole]||[];
+  if(!list.length){
+    listEl.innerHTML = `<div class="notif-empty">No notifications yet.</div>`;
+    return;
+  }
+  listEl.innerHTML = list.map(n=>`
+    <div class="notif-item ${n.read?'':'unread'}" onclick="markNotifRead(${n.id})">
+      <span class="ni-icon">${n.icon}</span>
+      <div class="ni-body">
+        <div class="ni-msg">${n.msg}</div>
+        <div class="ni-time">${n.time}</div>
+      </div>
+      ${n.read?'':'<span class="ni-dot"></span>'}
+    </div>
+  `).join('');
+}
+function toggleNotifPanel(e){
+  if(e) e.stopPropagation();
+  const panel = document.getElementById('notifPanel');
+  if(!panel) return;
+  const opening = !panel.classList.contains('active');
+  panel.classList.toggle('active', opening);
+  if(opening) renderNotifList();
+}
+function closeNotifPanel(){
+  const panel = document.getElementById('notifPanel');
+  if(panel) panel.classList.remove('active');
+}
+function markNotifRead(id){
+  const list = notifications[currentRole]||[];
+  const n = list.find(x=>x.id===id);
+  if(n) n.read = true;
+  renderNotifBell();
+}
+function markAllNotifsRead(){
+  (notifications[currentRole]||[]).forEach(n=>n.read=true);
+  renderNotifBell();
+}
+document.addEventListener('click', function(e){
+  const wrap = document.getElementById('notifWrap');
+  if(wrap && !wrap.contains(e.target)) closeNotifPanel();
+});
+function timeToMins(value){
+  const [hh,mm] = value.split(':').map(Number);
+  return hh*60 + mm;
+}
+function minsToTime(total){
+  const hh = Math.floor(total/60);
+  const mm = total%60;
+  return `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
+}
+function formatClock(value){
+  const [hh,mm] = value.split(':').map(Number);
+  const d = new Date(2026,6,27,hh,mm,0,0);
+  return d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true});
+}
+function meetingRoomEndTime(startTime, duration){
+  return minsToTime(timeToMins(startTime) + duration);
+}
+function roomBookingRangeLabel(startTime, endTime){
+  return `${formatClock(startTime)} - ${formatClock(endTime)}`;
+}
+function cabinBookingOverlaps(cabinId, date, startTime, endTime, ignoreId=null){
+  const start = timeToMins(startTime);
+  const end = timeToMins(endTime);
+  return cabinRoomBookings.some(b=>{
+    if(b.cabinId!==cabinId || b.date!==date || (ignoreId && b.id===ignoreId)) return false;
+    if(b.status==='rejected') return false; // rejected requests free up the slot
+    const bookedStart = timeToMins(b.startTime);
+    const bookedEnd = timeToMins(b.endTime);
+    return start < bookedEnd && end > bookedStart;
+  });
+}
+function cabinStatusLabel(cabinId, date){
+  const bookingsToday = cabinRoomBookings.filter(b=>b.cabinId===cabinId && b.date===date && b.status!=='rejected').sort((a,b)=>a.startTime.localeCompare(b.startTime));
+  if(!bookingsToday.length) return 'Book';
+  const next = bookingsToday[0];
+  const label = roomBookingRangeLabel(next.startTime, next.endTime);
+  return next.status==='pending_approval' ? `Pending ${label}` : `Booked ${label}`;
+}
+function findCabinLocation(cabinId){
+  for(const building of Object.keys(cabinRooms)){
+    for(const floor of Object.keys(cabinRooms[building])){
+      const found = (cabinRooms[building][floor]||[]).find(c=>c.id===cabinId);
+      if(found) return {cabin:found, building, floor};
+    }
+  }
+  return null;
+}
+
+/* =========================================================
+   AUTO-RELEASE / NO-SHOW ENGINE
+========================================================= */
+function runAutoRelease(){
+  let released = 0;
+  bookings.forEach(b=>{
+    if(b.status==='held' && simTime > b.checkinDeadline){
+      b.status = 'no_show';
+      released++;
+      const emp = empById(b.empId);
+      if(emp){
+        emp.noShow++;
+        if(emp.noShow>=3 && !emp.restrictedUntil){
+          const restrict = new Date(simTime); restrict.setDate(restrict.getDate()+7);
+          emp.restrictedUntil = isoDate(restrict);
+          if(emp.id===personaObj().id){
+            toast(`${emp.name}: 3 no-shows in a rolling period — booking access suspended for 1 week.`,'bad');
+          }
+        }
+      }
+    }
+  });
+  if(released>0 && document.getElementById('view-booking').classList.contains('active')) renderBooking();
+  return released;
+}
+/* =========================================================
+   SHIFT-ENDING-SOON POPUP
+   When a checked-in employee's booked shift/half-day window is
+   ~15 minutes from ending, prompt them to continue (extend 1
+   hour, only if the seat stays free) or leave the seat now.
+========================================================= */
+function checkShiftEndingSoon(){
+  if(document.getElementById('shiftEndBackdrop').classList.contains('active')) return; // one prompt at a time
+  const persona = personaObj();
+  if(!persona) return;
+  const candidate = bookings.find(b=>
+    b.empId===persona.id && b.status==='checked_in' && !b.notifiedEndingSoon &&
+    (b.shiftEndAt - simTime) <= 15*60000
+  );
+  if(candidate){
+    candidate.notifiedEndingSoon = true;
+    openShiftEndModal(candidate.id);
+  }
+}
+function canExtendBooking(b){
+  const seat = seats.find(s=>s.id===b.seatId);
+  if(!seat || seat.oos || seat.reserved) return false;
+  const newEnd = new Date(b.shiftEndAt.getTime() + 60*60000);
+  const newEndDateStr = isoDate(newEnd);
+  if(newEndDateStr !== b.date){
+    // the extra hour spills into the next calendar date — only allow if the seat is free then
+    if(seatStatusOnDate(seat, newEndDateStr) !== 'available') return false;
+  }
+  return true;
+}
+function openShiftEndModal(bookingId){
+  const b = bookings.find(x=>x.id===bookingId);
+  if(!b) return;
+  const minsLeft = Math.max(0, Math.round((b.shiftEndAt - simTime)/60000));
+  const extendable = canExtendBooking(b);
+  document.getElementById('shiftEndBody').innerHTML = `
+    <div style="text-align:center;padding:4px 0 6px;">
+      <div style="font-size:36px;line-height:1;margin-bottom:8px;">⏰</div>
+      <h3 style="margin-bottom:2px;">Your shift is ending soon</h3>
+      <p class="sub">Seat ${b.seatId} · ${minsLeft>0?`${minsLeft} minute${minsLeft===1?'':'s'} left`:'time is up'} · ends at ${b.endTime}</p>
+    </div>
+    <div class="banner ${extendable?'banner-info':'banner-warn'}">${extendable ? 'Continue at this seat for 1 more hour, or leave now so it can be released.' : 'This seat is needed after your shift — please wrap up and leave so it can be released.'}</div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" style="flex:1;" onclick="leaveSeatNow('${b.id}')">Leave seat</button>
+      <button class="btn btn-primary" style="flex:1;" onclick="extendBooking('${b.id}')" ${extendable?'':'disabled'}>Continue (+1 hour)</button>
+    </div>
+  `;
+  document.getElementById('shiftEndBackdrop').classList.add('active');
+}
+function closeShiftEndModal(){
+  document.getElementById('shiftEndBackdrop').classList.remove('active');
+}
+function extendBooking(bookingId){
+  const b = bookings.find(x=>x.id===bookingId);
+  if(!b) return;
+  if(!canExtendBooking(b)){
+    toast(`Seat ${b.seatId} isn't free for another hour — please wrap up soon.`,'bad');
+    closeShiftEndModal();
+    return;
+  }
+  b.endTime = addHoursToTime(b.endTime, 1);
+  b.shiftEndAt = new Date(b.shiftEndAt.getTime() + 60*60000);
+  b.extended = true;
+  b.notifiedEndingSoon = false; // allow a fresh "ending soon" prompt near the new end time
+  toast(`Extended — ${b.seatId} held until ${b.endTime}.`,'good');
+  closeShiftEndModal();
+  renderMyBookings(); refreshCurrentView();
+}
+function leaveSeatNow(bookingId){
+  const b = bookings.find(x=>x.id===bookingId);
+  if(b){
+    b.status = 'cancelled';
+    toast(`Checked out of ${b.seatId} — seat released.`,'info');
+  }
+  closeShiftEndModal();
+  renderMyBookings(); refreshCurrentView();
+}
+function advanceClock(){
+  simTime = new Date(simTime.getTime() + 30*60000);
+  updateClock();
+  const released = runAutoRelease();
+  if(released>0){
+    toast(`Auto-release: ${released} seat(s) reclaimed after missed check-in window.`,'warn');
+  }
+  checkShiftEndingSoon();
+  refreshCurrentView();
+}
+function updateClock(){
+  document.getElementById('clockDisplay').textContent =
+    simTime.toLocaleDateString('en-IN',{day:'2-digit',month:'short'}) + '  ' + fmtTime(simTime);
+  renderOfficeEntryBox();
+}
+
+/* =========================================================
+   OFFICE ENTRY (ID CARD / BIOMETRIC) — DEMO
+   Check-in is only available once the logged-in employee has
+   "scanned in" at the office for today.
+========================================================= */
+function isScannedInToday(empId){
+  return !!(officeCheckins[empId] && officeCheckins[empId][todayStr]);
+}
+function officeScanTime(empId){
+  return (officeCheckins[empId] && officeCheckins[empId][todayStr]) || null;
+}
+function scanOfficeEntry(){
+  const emp = personaObj();
+  if(!officeCheckins[emp.id]) officeCheckins[emp.id] = {};
+  officeCheckins[emp.id][todayStr] = fmtTime(simTime);
+  toast(`ID card / biometric scanned at ${fmtTime(simTime)} — check-in is now available.`, 'good');
+
+  // Auto check-in: scanning the ID card / biometric immediately checks the
+  // employee into any of today's held bookings (if still within the
+  // check-in window), which flips the seat to "seated"/occupied and the
+  // booking status to "checked-in" — no separate manual check-in click needed.
+  const todays = bookings.filter(b=>b.empId===emp.id && b.date===todayStr && b.status==='held');
+  todays.forEach(b=>{
+    if(simTime > b.checkinDeadline){
+      toast(`Check-in window already closed for ${b.seatId} — couldn't auto check-in.`,'warn');
+      return;
+    }
+    b.status='checked_in';
+    toast(`Auto checked in to ${b.seatId}. Enjoy the day!`,'good');
+  });
+
+  renderOfficeEntryBox();
+  renderMyBookings();
+  refreshCurrentView();
+}
+function resetOfficeEntry(){
+  const emp = personaObj();
+  if(officeCheckins[emp.id]) delete officeCheckins[emp.id][todayStr];
+  toast('Office entry reset for demo purposes.', 'info');
+  renderOfficeEntryBox();
+  refreshCurrentView();
+}
+function renderOfficeEntryBox(){
+  const box = document.getElementById('officeEntryBox');
+  if(!box) return;
+  const emp = personaObj();
+  const scannedAt = officeScanTime(emp.id);
+  box.innerHTML = `
+    Office entry (demo)
+    ${scannedAt
+      ? `<div class="office-entry-status in">✅ Scanned in — ${emp.name}<span class="office-entry-time">at ${scannedAt} today</span></div>
+         <button class="rail-clock-btn" onclick="resetOfficeEntry()">↺ Reset (simulate not scanned)</button>`
+      : `<div class="office-entry-status out">⛔ Not scanned in yet</div>
+         <button class="rail-clock-btn" onclick="scanOfficeEntry()">🪪 Simulate ID card / biometric scan</button>`
+    }
+  `;
+}
+
+/* =========================================================
+   NAV / VIEWS
+========================================================= */
+const navConfig = {
+  employee: [
+    {id:'booking', icon:'⊡', label:'Book a Seat'},
+    {id:'mybookings', icon:'☰', label:'My Bookings'},
+  ],
+  rahul: [
+    {id:'booking', icon:'⊡', label:'Book a Seat'},
+    {id:'mybookings', icon:'☰', label:'My Bookings'},
+  ],
+  manager: [
+    {id:'booking', icon:'⊡', label:'Book a Seat'},
+    {id:'mybookings', icon:'☰', label:'My Bookings'},
+  ],
+  hr: [
+    {id:'booking', icon:'⊡', label:'Book a Seat'},
+    {id:'mybookings', icon:'☰', label:'My Bookings'},
+    {id:'hr-employees', icon:'▣', label:'Management'},
+    {id:'reports', icon:'▤', label:'Company Insights'},
+  ]
+};
+let currentView = 'booking';
+
+const demoCredentials = [
+  {role:'employee', name:'Praphul Parinam', label:'Engineering · Employee', username:'praphul.parinam', password:'Employee@123'},
+  {role:'rahul', name:'Rahul Sharma', label:'Engineering · Employee (Evening)', username:'rahul.sharma', password:'Employee@123'},
+  {role:'manager', name:'Meera Nair', label:'Engineering · Manager', username:'meera.nair', password:'Manager@123'},
+  {role:'hr', name:'Ayesha Khan', label:'HR Business Partner', username:'ayesha.khan', password:'HrAccess@123'},
+];
+let loginPwVisible = false;
+let demoPwVisible = false;
+let loginErrorMsg = '';
+
+function renderLoginScreen(){
+  const demoRows = demoCredentials.map(c=>`
+    <div class="demo-cred-row">
+      <div class="dc-role">
+        <div class="dc-avatar">${personas[c.role].initials}</div>
+        <div>
+          <div class="dc-name">${c.name}</div>
+          <div class="dc-label">${c.label}</div>
+        </div>
+      </div>
+      <div class="dc-creds">
+        <div class="dc-user">${c.username}</div>
+        <div class="dc-pass">${c.password}</div>
+      </div>
+      <button type="button" class="dc-use-btn" onclick="fillLogin('${c.username}','${c.password}')">Use</button>
+    </div>
+  `).join('');
+
+  const demoCredsCard = `
+    <div class="demo-creds-card">
+      <div class="demo-creds-head">
+        <h3>Demo credentials (POC only)</h3>
+      </div>
+      <p class="demo-creds-note">Use any of these to sign in and preview a role.</p>
+      ${demoPwVisible ? `
+        <button type="button" class="pw-visibility-toggle" onclick="toggleDemoPwVisibility()">🙈 Hide credentials</button>
+        <div class="demo-cred-rows">${demoRows}</div>
+      ` : `
+        <button type="button" class="pw-visibility-toggle" onclick="toggleDemoPwVisibility()">👁 Show demo credentials</button>
+      `}
+    </div>
+  `;
+
+  document.getElementById('login-screen').innerHTML = `
+    <div class="login-shell">
+      <div class="login-visual">
+        <div class="login-visual-decor"></div>
+        <div class="login-visual-inner">
+          <div class="login-visual-brand">
+            <img class="login-mark-lg" src="logo.png" alt="Sparity Workspace logo">
+            <div class="login-visual-brandtext">
+              <div class="login-visual-name">Sparity Workspace</div>
+              <div class="login-visual-loc">Madhapur, Hyderabad</div>
+            </div>
+          </div>
+          <h1>Find your seat.<br><span>Book it in seconds.</span></h1>
+          <p class="tagline">One place to find and book a desk across Sparity offices — starting with Madhapur.</p>
+          ${demoCredsCard}
+          <div class="login-visual-foot">Prototype build · Sparity IT Security review pending · v0.9</div>
+        </div>
+      </div>
+      <div class="login-formside">
+        <div class="login-formside-inner">
+          <div class="login-formside-tag">Sign in to continue</div>
+          <div class="login-form-card">
+            <h2>Welcome back</h2>
+            <p class="sub2">Use your Sparity workspace credentials to continue.</p>
+            <div class="login-error ${loginErrorMsg?'active':''}" id="loginError">${loginErrorMsg||''}</div>
+            <form id="loginForm" onsubmit="handleLogin(event)">
+              <div class="field-group">
+                <label for="loginUsername">Username</label>
+                <div class="field-input-wrap">
+                  <input id="loginUsername" name="username" type="text" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="e.g. praphul.parinam" required>
+                </div>
+              </div>
+              <div class="field-group">
+                <label for="loginPassword">Password</label>
+                <div class="field-input-wrap">
+                  <input id="loginPassword" name="password" type="${loginPwVisible?'text':'password'}" autocomplete="current-password" placeholder="Enter password" required>
+                  <button type="button" class="pw-toggle" onclick="toggleLoginPwVisibility()">${loginPwVisible?'Hide':'Show'}</button>
+                </div>
+              </div>
+              <button type="submit" class="login-submit" id="loginSubmitBtn">Sign in</button>
+            </form>
+            <div class="login-foot2">Prototype build · Sparity IT Security review pending · v0.9</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function preserveLoginInputs(fn){
+  const u = document.getElementById('loginUsername') ? document.getElementById('loginUsername').value : '';
+  const p = document.getElementById('loginPassword') ? document.getElementById('loginPassword').value : '';
+  fn();
+  renderLoginScreen();
+  if(document.getElementById('loginUsername')) document.getElementById('loginUsername').value = u;
+  if(document.getElementById('loginPassword')) document.getElementById('loginPassword').value = p;
+}
+function toggleLoginPwVisibility(){ preserveLoginInputs(()=>{ loginPwVisible = !loginPwVisible; }); }
+function toggleDemoPwVisibility(){ preserveLoginInputs(()=>{ demoPwVisible = !demoPwVisible; }); }
+function fillLogin(username, password){
+  loginErrorMsg = '';
+  document.getElementById('loginUsername').value = username;
+  document.getElementById('loginPassword').value = password;
+  const el = document.getElementById('loginError');
+  if(el){ el.classList.remove('active'); el.textContent=''; }
+}
+function handleLogin(e){
+  e.preventDefault();
+  const username = document.getElementById('loginUsername').value.trim().toLowerCase();
+  const password = document.getElementById('loginPassword').value.trim();
+  const match = demoCredentials.find(c=>c.username.toLowerCase()===username && c.password===password);
+  if(!match){
+    loginErrorMsg = 'Invalid username or password. Check the demo credentials below.';
+    const el = document.getElementById('loginError');
+    el.textContent = loginErrorMsg;
+    el.classList.add('active');
+    return;
+  }
+  loginErrorMsg = '';
+  const btn = document.getElementById('loginSubmitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Signing in...';
+  setTimeout(()=>{
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').classList.add('active');
+    updateClock();
+    switchPersona(match.role);
+  }, 700);
+}
+function logout(){
+  closeModal();
+  document.getElementById('app').classList.remove('active');
+  loginPwVisible = false;
+  demoPwVisible = false;
+  loginErrorMsg = '';
+  renderLoginScreen();
+  document.getElementById('login-screen').style.display='flex';
+}
+
+function switchPersona(role){
+  if(!personas[role]) return;
+  currentRole = role;
+  const p = personaObj();
+  bookingTargetEmpId = p.id;
+  selectedTeamSeats = [];
+  initBookingViewForPersona();
+  document.getElementById('userAvatar').textContent = p.initials;
+  document.getElementById('userName').textContent = p.name;
+  document.getElementById('userRole').textContent = p.roleLabel;
+  // Update active persona dot
+  document.querySelectorAll('.persona-btn').forEach(b=>b.classList.toggle('active', b.dataset.role===role));
+  buildNav();
+  renderAll();
+  currentView = 'booking';
+  showView('booking');
+}
+
+function openAccountMenu(){
+  const p = personaObj();
+  document.getElementById('modalBody').innerHTML = `
+    <h3>${p.name}</h3>
+    <p class="sub">${p.roleLabel}</p>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="logout()">Logout</button>
+    </div>
+  `;
+  setModalWide(false);
+  document.getElementById('modalBackdrop').classList.add('active');
+}
+function toggleMobileNav(){
+  document.getElementById('appRail').classList.toggle('mobile-open');
+  document.getElementById('mobileNavBackdrop').classList.toggle('active');
+}
+function closeMobileNav(){
+  document.getElementById('appRail').classList.remove('mobile-open');
+  document.getElementById('mobileNavBackdrop').classList.remove('active');
+}
+function buildNav(){
+  const nav = document.getElementById('railNav');
+  nav.innerHTML = '<div class="rail-section-label">Menu</div>' + navConfig[currentRole].map(item=>
+    `<button class="rail-item" data-nav="${item.id}" onclick="showView('${item.id}')"><span class="rail-icon">${item.icon}</span>${item.label}</button>`
+  ).join('');
+}
+
+function initBookingViewForPersona(){
+  // Auto-assign building/floor from the current persona's employee record
+  const p = personaObj();
+  const emp = empById(p.id);
+  selectedLocation = LOCATIONS[0];
+  selectedBuilding = emp ? emp.assignedBuilding : BUILDINGS[0];
+  selectedFloorName = emp ? emp.assignedFloor : FLOORS[0];
+  bookingStep = 'floor-layout';
+  selectedWorkspace = null;
+  selectedTeamSeats = [];
+  activeStatusFilters = ['all'];
+}
+function showView(id){
+  closeMobileNav();
+  const hrSubViews = ['hr-employees','hr-buildings','hr-seats','hr-bookings'];
+  if(!navConfig[currentRole].some(item=>item.id===id) && !(currentRole==='hr' && hrSubViews.includes(id))){
+    id = 'booking';
+  }
+  if(id==='booking' && (currentView!=='booking' || !selectedBuilding || !selectedFloorName)){
+    initBookingViewForPersona();
+  }
+  currentView = id;
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  // Map HR sub-views to same container or dedicated containers
+  const hrViews = ['hr-employees','hr-buildings','hr-seats','hr-bookings'];
+  if(hrViews.includes(id)){
+    document.getElementById('view-hr').classList.add('active');
+  } else {
+    const el = document.getElementById('view-'+id);
+    if(el) el.classList.add('active');
+  }
+  document.querySelectorAll('.rail-item').forEach(b=>{
+    const nav = b.dataset.nav;
+    const isManagementSub = nav==='hr-employees' && hrSubViews.includes(id);
+    b.classList.toggle('active', nav===id || isManagementSub);
+  });
+  const titles = {
+    booking:'Book a Seat', mybookings:'My Bookings',
+    hr:'HR', reports:'Company Insights',
+    'hr-employees':'Management', 'hr-buildings':'Building & Floor Management',
+    'hr-seats':'Seat Management', 'hr-bookings':'Booking Management'
+  };
+  document.getElementById('viewTitle').textContent = titles[id] || id;
+  refreshCurrentView();
+}
+function refreshCurrentView(){
+  const viewFns = {
+    booking:renderBooking, mybookings:renderMyBookings,
+    reports:renderReports,
+    'hr-employees':renderHREmployees, 'hr-buildings':renderHRBuildings,
+    'hr-seats':renderHRSeats, 'hr-bookings':renderHRBookings,
+    hr:renderHREmployees
+  };
+  if(viewFns[currentView]) viewFns[currentView]();
+}
+function renderAll(){
+  renderBooking(); renderMyBookings();
+  renderReports();
+}
+
+/* =========================================================
+   UTILIZATION HELPERS
+========================================================= */
+function computeUtilization(date){
+  const bookable = seats.filter(s=>!s.reserved && !s.oos);
+  const occ = bookable.filter(s=>{
+    const st = seatStatusOnDate(s,date);
+    return st==='held'||st==='occupied';
+  }).length;
+  return Math.round((occ/bookable.length)*100);
+}
+function computeNoShowRate(){
+  const total = bookings.length;
+  const ns = bookings.filter(b=>b.status==='no_show').length;
+  return total? Math.round((ns/total)*1000)/10 : 0;
+}
+function computeBtoO(){
+  const relevant = bookings.filter(b=>['checked_in','no_show'].includes(b.status));
+  const checked = bookings.filter(b=>b.status==='checked_in').length;
+  return relevant.length? Math.round((checked/relevant.length)*1000)/10 : 100;
+}
+
+/* =========================================================
+   BOOKING / FLOOR MAP
+========================================================= */
+const zoneOrderLegacy = ['Engineering Pod A','Engineering Pod B','Design Studio','Sales Bay','Ops & Support','Leadership (Reserved)'];
+const workspaceMetaLegacy = {
+  'Engineering Pod A': 'Engineering · Open desks',
+  'Engineering Pod B': 'Engineering · Open desks',
+  'Design Studio': 'Design · Open desks',
+  'Sales Bay': 'Sales · Open desks',
+  'Ops & Support': 'Ops · Open desks',
+  'Leadership (Reserved)': 'Leadership · Reserved cabins'
+};
+let teamDurationMode = 'full';
+let teamMultiFrom = null, teamMultiTo = null;
+let teamMonthValue = null;
+let activeStatusFilters = ['all']; // multi-select: subset of 'available' | 'booked' | 'blocked' | 'maintenance', or ['all']
+function toggleStatusFilter(key){
+  if(key==='all'){
+    activeStatusFilters = ['all'];
+  } else {
+    activeStatusFilters = activeStatusFilters.filter(k=>k!=='all');
+    const idx = activeStatusFilters.indexOf(key);
+    if(idx>=0) activeStatusFilters.splice(idx,1);
+    else activeStatusFilters.push(key);
+    if(!activeStatusFilters.length) activeStatusFilters = ['all'];
+  }
+  renderBooking();
+}
+
+function computeDatesForMode(mode, baseDate, fromDate, toDate, monthStr){
+  if(mode==='full') return [baseDate];
+  if(mode==='multi'){
+    if(!fromDate || !toDate || toDate < fromDate) return [];
+    const dates=[];
+    let d = new Date(fromDate+'T00:00:00');
+    const end = new Date(toDate+'T00:00:00');
+    while(d<=end){
+      const day = d.getDay();
+      if(day!==0 && day!==6) dates.push(isoDate(d));
+      d.setDate(d.getDate()+1);
+    }
+    return dates;
+  }
+  if(mode==='month'){
+    if(!monthStr) return [];
+    const [y,m] = monthStr.split('-').map(Number);
+    const dates=[];
+    const last = new Date(y, m, 0).getDate();
+    for(let day=1; day<=last; day++){
+      const d = new Date(y, m-1, day);
+      const wd = d.getDay();
+      if(wd!==0 && wd!==6) dates.push(isoDate(d));
+    }
+    return dates;
+  }
+  return [baseDate];
+}
+function currentFloorSeats(){
+  return seats.filter(s=>s.location===selectedLocation && s.building===selectedBuilding && s.floor===selectedFloorName);
+}
+function currentWorkspaceNames(){
+  return [...new Set(currentFloorSeats().map(s=>s.zone))];
+}
+function teamTargetDates(){
+  return computeDatesForMode(teamDurationMode, selectedDate, teamMultiFrom, teamMultiTo, teamMonthValue);
+}
+function setTeamDurationMode(mode){
+  teamDurationMode = mode;
+  if(mode==='multi' && (!teamMultiFrom || !teamMultiTo)){ teamMultiFrom = selectedDate; teamMultiTo = selectedDate; }
+  if(mode==='month' && !teamMonthValue){ teamMonthValue = selectedDate.slice(0,7); }
+  renderBooking();
+}
+function setTeamMultiFrom(v){ teamMultiFrom = v; if(teamMultiTo && teamMultiTo < v) teamMultiTo = v; renderBooking(); }
+function setTeamMultiTo(v){ teamMultiTo = v; if(teamMultiFrom && teamMultiFrom > v) teamMultiFrom = v; renderBooking(); }
+function setTeamMonthValue(v){ teamMonthValue = v; renderBooking(); }
+
+function canBookSeatType(seatType){
+  // cabin = cabin rooms (left/right in layout image); normal = regular desks
+  if(seatType === 'blocked') return false;
+  // Cabins can be booked directly by any role — booking confirms immediately,
+  // no HR approval step (see confirmCabinBooking).
+  return true;
+}
+
+function getFloorCabins(building, floor){
+  return (cabinRooms[building] && cabinRooms[building][floor]) ? cabinRooms[building][floor] : [];
+}
+function findCabinById(cabinId){
+  for(const building of Object.keys(cabinRooms)){
+    for(const floor of Object.keys(cabinRooms[building])){
+      const found = (cabinRooms[building][floor]||[]).find(c=>c.id===cabinId);
+      if(found) return {...found, building, floor};
+    }
+  }
+  return null;
+}
+
+function renderBooking(){
+  const p = personaObj();
+  const emp = bookingTargetObj();
+  const restricted = emp && emp.restrictedUntil && emp.restrictedUntil >= selectedDate;
+  const myBookingToday = activeBookingsFor(emp.id, selectedDate)[0];
+  const empData = empById(p.id);
+
+  // Building/Floor dropdowns
+  const buildingOptions = BUILDINGS.map(b=>`<option value="${b}" ${selectedBuilding===b?'selected':''}>${b}</option>`).join('');
+  const floorOptions = (FLOOR_LAYOUTS[selectedBuilding] ? Object.keys(FLOOR_LAYOUTS[selectedBuilding]) : FLOORS)
+    .map(f=>`<option value="${f}" ${selectedFloorName===f?'selected':''}>${f}</option>`).join('');
+
+  const assignedTag = empData && (empData.assignedBuilding===selectedBuilding && empData.assignedFloor===selectedFloorName)
+    ? `<span class="status-pill pill-ok" style="font-size:10px;padding:2px 8px;">Your assigned floor</span>` : '';
+
+  const dropdownBar = `
+    <div class="booking-dropdown-bar">
+      <div class="booking-dropdown-group">
+        <label>Building</label>
+        <select onchange="selectedBuilding=this.value; selectedFloorName=Object.keys(FLOOR_LAYOUTS[this.value]||{})[0]||FLOORS[0]; activeStatusFilters=['all']; selectedTeamSeats=[]; renderBooking();">${buildingOptions}</select>
+      </div>
+      <div class="booking-dropdown-group">
+        <label>Floor</label>
+        <select onchange="selectedFloorName=this.value; activeStatusFilters=['all']; selectedTeamSeats=[]; renderBooking();">${floorOptions}</select>
+      </div>
+      ${assignedTag}
+      ${empData && !(empData.assignedBuilding===selectedBuilding && empData.assignedFloor===selectedFloorName) ? `<button class="btn btn-ghost btn-sm" onclick="selectedBuilding='${empData.assignedBuilding}';selectedFloorName='${empData.assignedFloor}';activeStatusFilters=['all'];selectedTeamSeats=[];renderBooking();">↩ Back to my floor</button>` : ''}
+    </div>
+  `;
+
+  // Status filter buttons
+  const filters = [
+    {key:'all', label:'All Seats'},
+    {key:'available', label:'Available'},
+    {key:'booked', label:'Booked'},
+    {key:'blocked', label:'Blocked'},
+    {key:'maintenance', label:'Maintenance'},
+  ];
+  const filterBar = `
+    <div class="status-filter-bar">
+      ${filters.map(f=>`<button class="filter-btn ${activeStatusFilters.includes(f.key)?'active':''}" onclick="toggleStatusFilter('${f.key}')">${f.label}</button>`).join('')}
+    </div>
+  `;
+
+  const targetControl = currentRole==='manager' ? `
+    <div class="booking-target">
+      <label>Booking for</label>
+      <select onchange="bookingTargetEmpId=this.value; selectedTeamSeats=[]; teamDurationMode='full'; teamMultiFrom=selectedDate; teamMultiTo=selectedDate; teamMonthValue=selectedDate.slice(0,7); renderBooking();">
+        <option value="${p.id}" ${bookingTargetEmpId===p.id?'selected':''}>Myself</option>
+        <option value="team" ${bookingTargetEmpId==='team'?'selected':''}>My team</option>
+      </select>
+    </div>
+  ` : '';
+
+  const teamDates = currentRole==='manager' && bookingTargetEmpId==='team' ? teamTargetDates() : [selectedDate];
+  const teamBookings = currentRole==='manager' && bookingTargetEmpId==='team'
+    ? bookings.filter(b=>managerTeamBookingIds().includes(b.empId) && teamDates.includes(b.date) && (b.status==='held'||b.status==='checked_in'))
+    : [];
+  const unbookedTeam = currentRole==='manager' && bookingTargetEmpId==='team' ? unbookedManagerTeamMembers(selectedDate) : [];
+  const maxTeamCapacity = currentRole==='manager' && bookingTargetEmpId==='team'
+    ? Math.max(0, ...teamDates.map(dt=>unbookedManagerTeamMembers(dt).length))
+    : 0;
+  const floorSeats = currentFloorSeats();
+  selectedTeamSeats = selectedTeamSeats.filter(seatId=>floorSeats.some(s=>s.id===seatId)).slice(0, maxTeamCapacity);
+
+  const teamModeBtn = (mode,label) => `<button type="button" class="dur-mode-btn ${teamDurationMode===mode?'active':''}" onclick="setTeamDurationMode('${mode}')">${label}</button>`;
+  let teamRangeControls = '';
+  if(teamDurationMode==='multi'){
+    teamRangeControls = `<div class="dur-range-row"><label>From <input type="date" value="${teamMultiFrom||selectedDate}" onchange="setTeamMultiFrom(this.value)"></label><label>To <input type="date" value="${teamMultiTo||selectedDate}" onchange="setTeamMultiTo(this.value)"></label></div>`;
+  } else if(teamDurationMode==='month'){
+    teamRangeControls = `<div class="dur-range-row"><label>Month <input type="month" value="${teamMonthValue||selectedDate.slice(0,7)}" onchange="setTeamMonthValue(this.value)"></label></div>`;
+  }
+  const teamDateSummary = teamDates.length===0 ? 'Pick a valid date range.'
+    : teamDates.length===1 ? fmtDateShort(new Date(teamDates[0]+'T00:00:00'))
+    : `${fmtDateShort(new Date(teamDates[0]+'T00:00:00'))} – ${fmtDateShort(new Date(teamDates[teamDates.length-1]+'T00:00:00'))} (${teamDates.length} weekdays)`;
+  const teamBookingPanel = currentRole==='manager' && bookingTargetEmpId==='team' ? `
+    <div class="card card-pad" style="margin-bottom:16px;">
+      <span class="section-tag">Team booking planner</span>
+      <div class="dur-mode-row">${teamModeBtn('full','Full Day')}${teamModeBtn('multi','Multi-Day')}${teamModeBtn('month','Month')}</div>
+      ${teamRangeControls}
+      <div class="banner banner-info" style="margin-bottom:12px;">${unbookedTeam.length} team member(s) need seats. Range: ${teamDateSummary}. Select up to ${maxTeamCapacity} seat(s) below.</div>
+      ${teamBookings.length ? `
+        <table><thead><tr><th>Date</th><th>Booked for</th><th>Seat</th><th>Zone</th><th>Status</th></tr></thead>
+        <tbody>${teamBookings.map(b=>{const seat=seats.find(s=>s.id===b.seatId);const owner=empById(b.empId).name;return `<tr><td>${fmtDateShort(new Date(b.date+'T00:00:00'))}</td><td>${owner}</td><td class="mono">${seat.id}</td><td>${seat.zone}</td><td><span class="status-pill ${b.status==='checked_in'?'pill-checked':'pill-held'}">${b.status==='checked_in'?'Checked in':'Booked'}</span></td></tr>`;}).join('')}</tbody></table>
+      ` : '<div class="empty-state" style="padding:14px;">No team bookings in this range yet.</div>'}
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="selectedTeamSeats=[]; renderBooking();" ${selectedTeamSeats.length?'':'disabled'}>Clear selected (${selectedTeamSeats.length})</button>
+        <button class="btn btn-primary" onclick="confirmTeamBooking()" ${selectedTeamSeats.length && teamDates.length?'':'disabled'}>Book ${selectedTeamSeats.length||''} for team</button>
+      </div>
+    </div>
+  ` : '';
+
+  const dateTabs = WEEK.map(d=>{
+    const iso = isoDate(d);
+    const active = iso===selectedDate;
+    const dayMonth = `${d.getDate()} ${d.toLocaleDateString('en-IN',{month:'short'})}`;
+    return `<button class="date-tab ${active?'active':''}" onclick="selectDate('${iso}')">${d.toLocaleDateString('en-IN',{weekday:'short'})}<span class="d-num">${dayMonth}</span></button>`;
+  }).join('');
+  const calendarMin = todayStr;
+  const calendarPicker = `
+    <div class="date-picker-wrap" style="position:relative;display:flex;align-items:center;">
+      <button type="button" class="btn btn-ghost btn-sm" title="Select date" onclick="openBookingDatePicker()">📅 Select date</button>
+      <input type="date" id="bookingDatePicker" min="${calendarMin}" value="${selectedDate}" onchange="selectDate(this.value)"
+             style="position:absolute;opacity:0;width:1px;height:1px;pointer-events:none;left:0;top:0;">
+    </div>
+  `;
+
+  let banner = '';
+  if(restricted){
+    banner = `<div class="banner banner-danger">⛔ Booking suspended for ${emp.name.split(' ')[0]} until ${emp.restrictedUntil} — 3 no-shows in the last 2 weeks.</div>`;
+  } else if(myBookingToday && bookingTargetEmpId !== 'team'){
+    const seat = seats.find(s=>s.id===myBookingToday.seatId);
+    banner = `<div class="banner banner-info">${emp.name} already has <b class="mono">${seat ? seat.id : myBookingToday.seatId}</b> booked for this date.</div>`;
+  }
+
+  const legend = `
+    <div class="legend">
+      <div class="legend-item"><span class="legend-swatch" style="background:var(--teal-soft);border:1px solid var(--teal);"></span>Available</div>
+      <div class="legend-item"><span class="legend-swatch" style="background:var(--amber-soft);border:1px solid var(--amber);"></span>Booked</div>
+      <div class="legend-item"><span class="legend-swatch" style="background:var(--primary-soft);border:1px solid var(--primary);"></span>Checked in</div>
+      <div class="legend-item"><span class="legend-swatch" style="background:var(--red-soft);border:1px solid var(--red);"></span>Blocked / Maintenance</div>
+      <div class="legend-item"><span class="legend-swatch cabin-legend-swatch"></span>Cabin Room</div>
+    </div>
+  `;
+
+  // Build the visual floor layout (cabins on sides, seats in middle)
+  const floorLayoutHtml = buildFloorLayoutHtml(floorSeats, emp, restricted, myBookingToday, maxTeamCapacity, selectedDate);
+
+  document.getElementById('view-booking').innerHTML = `
+    <div class="page-head"><h2>Book a Seat</h2><p>${selectedBuilding} · ${selectedFloorName} · ${fmtDateShort(new Date(selectedDate+'T00:00:00'))}</p></div>
+    ${dropdownBar}
+    <div class="floor-toolbar" style="margin-top:12px;">
+      <div class="date-tabs">${dateTabs}</div>
+      ${calendarPicker}
+      ${targetControl}
+    </div>
+    ${banner}
+    ${teamBookingPanel}
+    ${filterBar}
+    ${legend}
+    ${floorLayoutHtml}
+    <div class="subtle-note" style="margin-top:12px;">Seat status is re-checked at the moment you confirm — two people can never lock the same desk.</div>
+  `;
+}
+
+function seatMatchesFilter(seat, bookingDate){
+  if(activeStatusFilters.includes('all')) return true;
+  const hrStatus = seat.hrStatus || 'available';
+  return activeStatusFilters.some(key=>{
+    if(key === 'blocked') return hrStatus === 'blocked';
+    if(key === 'maintenance') return hrStatus === 'maintenance';
+    if(hrStatus !== 'available') return false; // blocked/maintenance won't match available/booked
+    const dynStatus = seatStatusOnDate(seat, bookingDate);
+    if(key === 'available') return dynStatus === 'available';
+    if(key === 'booked') return dynStatus === 'held' || dynStatus === 'occupied';
+    return false;
+  });
+}
+
+function buildFloorLayoutHtml(floorSeats, emp, restricted, myBookingToday, maxTeamCapacity, bookingDate){
+  const cabins = getFloorCabins(selectedBuilding, selectedFloorName);
+  const leftCabins = cabins.filter(c=>c.side==='left');
+  const rightCabins = cabins.filter(c=>c.side==='right');
+
+  // Group normal seats by zone rows
+  const zones = [...new Set(floorSeats.map(s=>s.zone))];
+
+  function renderCabin(cabin){
+    const isBlocked = cabin.hrStatus === 'blocked';
+    const canBook = !isBlocked && canBookSeatType('cabin');
+    const matchesFilter = activeStatusFilters.includes('all') ||
+      (activeStatusFilters.includes('blocked') && isBlocked) ||
+      (activeStatusFilters.includes('available') && !isBlocked);
+    const dimmed = !matchesFilter ? 'cabin-dimmed' : '';
+    const blockedClass = isBlocked ? 'cabin-blocked' : '';
+    const clickAttr = canBook && matchesFilter ? `onclick="openCabinBookModal('${cabin.id}','${cabin.name.replace(/'/g,"\\'")}')"` : '';
+    const statusText = isBlocked ? 'Blocked' : canBook ? cabinStatusLabel(cabin.id, selectedDate) : 'Cabin';
+    return `
+      <div class="cabin-room ${blockedClass} ${dimmed}" ${clickAttr} title="${cabin.name}${isBlocked?' (Blocked)':''}">
+        <div class="cabin-name">${cabin.name}</div>
+        <div class="cabin-status">${statusText}</div>
+      </div>`;
+  }
+
+  function renderSeat(s){
+    const hrStatus = s.hrStatus || 'available';
+    if(hrStatus === 'blocked'){
+      const matchesFilter = activeStatusFilters.includes('all') || activeStatusFilters.includes('blocked');
+      return `<div class="seat seat-oos ${matchesFilter?'':'seat-dimmed'}" data-seat-id="${s.id}" title="${s.id} - Blocked by HR"><div class="s-id">${s.id.split('-').pop()}</div><div class="s-status">Blocked</div></div>`;
+    }
+    if(hrStatus === 'maintenance'){
+      const matchesFilter = activeStatusFilters.includes('all') || activeStatusFilters.includes('maintenance');
+      return `<div class="seat seat-oos ${matchesFilter?'':'seat-dimmed'}" data-seat-id="${s.id}" title="${s.id} - Under maintenance"><div class="s-id">${s.id.split('-').pop()}</div><div class="s-status">Maint.</div></div>`;
+    }
+    const status = seatStatusOnDate(s, bookingDate);
+    const booking = bookings.find(b=>b.seatId===s.id && b.date===bookingDate && (b.status==='held'||b.status==='checked_in'));
+    const selectedForTeam = selectedTeamSeats.includes(s.id);
+    const mine = booking && booking.empId===emp.id;
+    const clickable = status==='available' && !restricted && (!myBookingToday || bookingTargetEmpId==='team') && (bookingTargetEmpId!=='team' || maxTeamCapacity>0);
+    const label = {available:'Open', held:'Booked', occupied:'Seated', vip:'Reserved', oos:'Out of use'}[status];
+    const matchesFilter = seatMatchesFilter(s, bookingDate);
+    const dimClass = matchesFilter ? '' : 'seat-dimmed';
+    return `<div class="seat seat-${status} ${mine?'seat-mine':''} ${selectedForTeam?'seat-selected':''} ${dimClass}"
+              data-seat-id="${s.id}"
+              title="${s.id} - ${label}"
+              ${clickable && matchesFilter ?`onclick="${bookingTargetEmpId==='team' ? `toggleTeamSeat('${s.id}')` : `openBookModal('${s.id}')`}"`:''}>
+              <div class="s-id">${s.id.split('-').pop()}</div><div class="s-status">${selectedForTeam?'Pick':label}</div>
+            </div>`;
+  }
+
+  const leftCabinHtml = leftCabins.map(renderCabin).join('');
+  const rightCabinHtml = rightCabins.map(renderCabin).join('');
+
+  const zoneRows = zones.map(zoneName=>{
+    const zSeats = floorSeats.filter(s=>s.zone===zoneName);
+    const avail = zSeats.filter(s=>s.hrStatus==='available' && seatStatusOnDate(s,bookingDate)==='available').length;
+    const total = zSeats.length;
+    return `
+      <div class="zone" style="margin-bottom:12px;">
+        <div class="zone-head">
+          <div class="zone-title">${zoneName}</div>
+          <div class="zone-meta">${avail}/${total} open</div>
+        </div>
+        <div class="seat-row">${zSeats.map(renderSeat).join('')}</div>
+      </div>`;
+  }).join('');
+
+  return `
+    <div class="floor-plan-card">
+      <div class="floor-layout-container">
+        <div class="floor-layout-left">${leftCabinHtml || '<div class="no-cabins"></div>'}</div>
+        <div class="floor-walkway"></div>
+        <div class="floor-layout-center">${zoneRows}</div>
+        <div class="floor-walkway"></div>
+        <div class="floor-layout-right">${rightCabinHtml || '<div class="no-cabins"></div>'}</div>
+      </div>
+    </div>
+  `;
+}
+
+function openCabinBookModal(cabinId, cabinName){
+  // Book a cabin room — reuses the meeting room start-time/duration flow.
+  // Booking is instant/direct for every role — no HR approval needed.
+  if(!canBookSeatType('cabin')){ toast('This cabin cannot be booked right now.','bad'); return; }
+  pendingCabinRoom = cabinId;
+  cabinRoomStartTime = '09:00';
+  cabinRoomDuration = 60;
+  cabinRoomConfirmed = false;
+  pendingCabinTeamMembers = [];
+  cabinTeamSearchTerm = '';
+  cabinMeetingName = '';
+  cabinMeetingReason = '';
+  setModalWide(true);
+  renderCabinBookModal();
+  document.getElementById('modalBackdrop').classList.add('active');
+}
+function renderCabinBookModal(){
+  const cabin = findCabinById(pendingCabinRoom);
+  if(!cabin) return;
+  const dateLabel = fmtDateShort(new Date(selectedDate+'T00:00:00'));
+  const startOptions = MEETING_START_TIMES.map(t=>`<option value="${t}" ${cabinRoomStartTime===t?'selected':''}>${formatClock(t)}</option>`).join('');
+  const durationOptions = MEETING_DURATION_OPTIONS.map(o=>`<option value="${o.value}" ${cabinRoomDuration===o.value?'selected':''}>${o.label}</option>`).join('');
+  const endTime = meetingRoomEndTime(cabinRoomStartTime, cabinRoomDuration);
+  const busy = cabinBookingOverlaps(cabin.id, selectedDate, cabinRoomStartTime, endTime);
+
+  const term = cabinTeamSearchTerm.trim().toLowerCase();
+  const candidates = eligibleCabinTeamMembers().filter(e=>!term || e.name.toLowerCase().includes(term) || e.dept.toLowerCase().includes(term));
+
+  const leftColumn = `
+    <div class="modal-row"><span>Location</span><span>${selectedBuilding} · ${selectedFloorName}</span></div>
+    <div class="modal-row"><span>Date</span><span>${dateLabel}</span></div>
+    <label style="display:block;margin-top:12px;font-size:12.5px;font-weight:600;">Meeting name
+      <input type="text" placeholder="e.g. Sprint planning" value="${cabinMeetingName.replace(/"/g,'&quot;')}" oninput="setCabinMeetingName(this.value)" style="margin-top:4px;">
+    </label>
+    <label style="display:block;margin-top:10px;font-size:12.5px;font-weight:600;">Reason / Agenda
+      <textarea rows="2" placeholder="Briefly describe the reason or agenda" oninput="setCabinMeetingReason(this.value)" style="margin-top:4px;width:100%;resize:vertical;">${cabinMeetingReason.replace(/</g,'&lt;')}</textarea>
+    </label>
+    <div class="dur-range-row" style="margin-top:12px;">
+      <label>Start time
+        <select onchange="setCabinRoomStartTime(this.value)">${startOptions}</select>
+      </label>
+      <label>Duration
+        <select onchange="setCabinRoomDuration(Number(this.value))">${durationOptions}</select>
+      </label>
+    </div>
+    <div class="modal-row"><span>End time</span><span>${formatClock(endTime)}</span></div>
+    <div class="modal-row"><span>Booked by</span><span>${personaObj().name}</span></div>
+    <div class="modal-row"><span>Status</span><span>${busy ? 'Time conflict' : 'Open'}</span></div>
+  `;
+
+  const rightColumn = `
+    <span class="split-right-heading">Team members</span>
+    <input type="text" placeholder="Search employees by name or department…" value="${cabinTeamSearchTerm.replace(/"/g,'&quot;')}" oninput="setCabinTeamSearch(this.value)" style="margin-bottom:10px;">
+    <div class="dur-preview" style="flex:1;min-height:0;">
+      ${candidates.length ? candidates.map(e=>{
+        const checked = pendingCabinTeamMembers.includes(e.id);
+        return `<label class="dur-preview-row" style="cursor:pointer;">
+          <span><input type="checkbox" ${checked?'checked':''} onchange="toggleCabinTeamMember('${e.id}')"> ${e.name}</span>
+          <span>${e.dept}</span>
+        </label>`;
+      }).join('') : `<div class="notif-empty">No matching employees.</div>`}
+    </div>
+    ${pendingCabinTeamMembers.length ? `<div class="modal-row" style="border-bottom:none;"><span>Selected</span><span>${pendingCabinTeamMembers.map(id=>empById(id).name).join(', ')}</span></div>` : ''}
+  `;
+
+  document.getElementById('modalBody').innerHTML = `
+    <h3>Book cabin</h3>
+    <p class="sub">${cabin.name}</p>
+    <div class="split-modal">
+      <div class="split-left">${leftColumn}</div>
+      <div class="split-right">${rightColumn}</div>
+    </div>
+    ${busy
+      ? `<div class="banner banner-danger" style="margin-top:14px;">That time overlaps with another booking for this cabin. Please choose a different start time or duration.</div>`
+      : ''
+    }
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="confirmCabinBooking()" ${busy?'disabled':''}>Confirm booking</button>
+    </div>
+  `;
+}
+function setCabinMeetingName(v){
+  cabinMeetingName = v;
+}
+function setCabinMeetingReason(v){
+  cabinMeetingReason = v;
+}
+function setCabinTeamSearch(v){
+  cabinTeamSearchTerm = v;
+  renderCabinBookModal();
+}
+function toggleCabinTeamMember(empId){
+  const idx = pendingCabinTeamMembers.indexOf(empId);
+  if(idx>=0) pendingCabinTeamMembers.splice(idx,1);
+  else pendingCabinTeamMembers.push(empId);
+  renderCabinBookModal();
+}
+function setCabinRoomStartTime(value){
+  cabinRoomStartTime = value;
+  renderCabinBookModal();
+}
+function setCabinRoomDuration(value){
+  cabinRoomDuration = value;
+  renderCabinBookModal();
+}
+function confirmCabinBooking(){
+  const cabin = findCabinById(pendingCabinRoom);
+  if(!cabin) return;
+  const endTime = meetingRoomEndTime(cabinRoomStartTime, cabinRoomDuration);
+  if(cabinBookingOverlaps(cabin.id, selectedDate, cabinRoomStartTime, endTime)){
+    toast('That time overlaps with another cabin booking.','bad');
+    renderCabinBookModal();
+    return;
+  }
+  const attendeeIds = [...pendingCabinTeamMembers];
+  const meetingName = cabinMeetingName.trim();
+  const meetingReason = cabinMeetingReason.trim();
+  cabinRoomBookings.push({
+    id:'CRB-'+(cabinRoomSeq++),
+    cabinId:cabin.id,
+    date:selectedDate,
+    startTime:cabinRoomStartTime,
+    endTime,
+    bookedBy:personaObj().id,
+    empId:personaObj().id,
+    meetingName,
+    reason:meetingReason,
+    status:'confirmed',
+    rejectionReason: null,
+    attendeeIds
+  });
+  cabinRoomConfirmed = true;
+  const timeLabel = roomBookingRangeLabel(cabinRoomStartTime, endTime);
+  const dateLabel = fmtDateShort(new Date(selectedDate+'T00:00:00'));
+  toast(`${cabin.name} booked for ${timeLabel}${attendeeIds.length ? ` with ${attendeeIds.length} team member(s)` : ''}.`, 'good');
+  // Notify each selected team member (where they map to a loggable persona) and
+  // associate the meeting with them so it shows in their own bookings.
+  attendeeIds.forEach(empId=>{
+    const emp = empById(empId);
+    if(!emp) return;
+    const role = roleForEmpId(empId);
+    if(role){
+      pushNotifForRole(role, `${personaObj().name} added you to a meeting in ${cabin.name} on ${dateLabel}, ${timeLabel}.`, 'info');
+    }
+  });
+  closeModal();
+  renderBooking();
+  renderMyBookings();
+}
+function goToStep(stepName){
+  bookingStep = stepName;
+  selectedTeamSeats = [];
+  renderBooking();
+}
+function selectLocation(loc){ selectedLocation = loc; renderBooking(); }
+function selectBuilding(b){ selectedBuilding = b; selectedFloorName = Object.keys(FLOOR_LAYOUTS[b]||{})[0]||FLOORS[0]; renderBooking(); }
+function selectFloorName(f){ selectedFloorName = f; renderBooking(); }
+function selectWorkspace(zoneName){ selectedWorkspace = zoneName; selectedTeamSeats = []; renderBooking(); }
+function selectDate(iso){ selectedDate = iso; selectedTeamSeats = []; renderBooking(); }
+function openBookingDatePicker(){
+  const el = document.getElementById('bookingDatePicker');
+  if(!el) return;
+  if(el.showPicker){ el.showPicker(); } else { el.focus(); el.click(); }
+}
+
+function toggleTeamSeat(seatId){
+  const idx = selectedTeamSeats.indexOf(seatId);
+  if(idx >= 0){
+    selectedTeamSeats.splice(idx, 1);
+    renderBooking();
+    return;
+  }
+  const capacity = Math.max(0, ...teamTargetDates().map(dt=>unbookedManagerTeamMembers(dt).length));
+  if(selectedTeamSeats.length >= capacity){
+    toast(`Only ${capacity} team member(s) need seats in the selected range.`,'warn');
+    return;
+  }
+  selectedTeamSeats.push(seatId);
+  renderBooking();
+}
+
+function confirmTeamBooking(){
+  const dates = teamTargetDates();
+  if(!dates.length){
+    toast('Pick a valid date range for team booking.','bad');
+    return;
+  }
+  let bookedCount = 0;
+  let skippedDates = 0;
+  const groupId = 'GRP-'+(groupSeq++);
+  dates.forEach(dt=>{
+    const recipients = unbookedManagerTeamMembers(dt);
+    const availableSeats = selectedTeamSeats
+      .filter(seatId=>seatStatusOnDate(seats.find(s=>s.id===seatId), dt)==='available')
+      .slice(0, recipients.length);
+    if(!availableSeats.length || !recipients.length){
+      skippedDates++;
+      return;
+    }
+    availableSeats.forEach((seatId, idx)=>mkBooking(seatId, recipients[idx].id, dt, 'held', {
+      groupId,
+      slotLabel: teamDurationMode==='month' ? 'Month booking' : teamDurationMode==='multi' ? 'Multi-Day booking' : 'Full Day'
+    }));
+    bookedCount += availableSeats.length;
+  });
+  if(!bookedCount){
+    toast('No team seats could be booked in the selected range.','bad');
+    selectedTeamSeats = [];
+    renderBooking();
+    return;
+  }
+  toast(`Booked ${bookedCount} team seat(s)${skippedDates ? `, skipped ${skippedDates} date(s)` : ''}.`,'good');
+  selectedTeamSeats = [];
+  renderBooking(); renderMyBookings();
+}
+
+let pendingSeat = null, collisionTriggered = false, bookingConfirmed = false;
+let durationMode = 'single'; // 'single' | 'multi' | 'month' — how many days
+let bookingShift = 'normal'; // set from the employee's assigned shift when the modal opens — not user-selectable
+let dayLengthMode = 'full'; // 'full' | 'half' — full assigned shift, or a half-day of N hours within it
+let halfDayHours = 4; // hours requested when dayLengthMode==='half'
+let multiFrom = null, multiTo = null;
+let multiWeekdays = []; // selected weekday numbers, 0=Sun ... 6=Sat
+let multiRepeatInterval = 1; // repeat every N weeks
+const WEEKDAY_LABELS = [{n:1,l:'M'},{n:2,l:'T'},{n:3,l:'W'},{n:4,l:'T'},{n:5,l:'F'},{n:6,l:'S'},{n:0,l:'S'}]; // Mon..Sun display order
+let monthValue = null; // 'YYYY-MM'
+let showDurationPreview = false;
+let showMultiBlockedDays = false; // reveal blocked/unavailable rows in the multi-day preview
+function openBookModal(seatId){
+  pendingSeat = seatId; collisionTriggered = false; bookingConfirmed = false;
+  durationMode = 'single';
+  const target = bookingTargetObj();
+  // Shift is always the employee's assigned shift — there is no "which shift?" choice.
+  bookingShift = (target && target.shift && SHIFTS[target.shift]) ? target.shift : 'normal';
+  dayLengthMode = 'full';
+  halfDayHours = defaultHalfDayHours(SHIFTS[bookingShift]);
+  multiFrom = selectedDate; multiTo = selectedDate; monthValue = selectedDate.slice(0,7);
+  multiWeekdays = [new Date(selectedDate+'T00:00:00').getDay()];
+  multiRepeatInterval = 1;
+  showDurationPreview = false;
+  showMultiBlockedDays = false;
+  setModalWide(false);
+  renderModal();
+  document.getElementById('modalBackdrop').classList.add('active');
+}
+function computeDurationDates(){
+  if(durationMode==='single') return [selectedDate];
+  if(durationMode==='multi'){
+    if(!multiFrom || !multiTo || multiTo < multiFrom || !multiWeekdays.length) return [];
+    const interval = Math.max(1, multiRepeatInterval|0);
+    const start = new Date(multiFrom+'T00:00:00');
+    const end = new Date(multiTo+'T00:00:00');
+    // Monday of the week containing the start date (so "week 0" always includes the start date)
+    const startDow = start.getDay(); // 0=Sun..6=Sat
+    const mondayOffset = startDow===0 ? 6 : startDow-1;
+    const anchorMonday = new Date(start); anchorMonday.setDate(anchorMonday.getDate()-mondayOffset);
+    const dates=[];
+    let d = new Date(start);
+    while(d<=end){
+      if(multiWeekdays.includes(d.getDay())){
+        const diffDays = Math.round((d - anchorMonday)/86400000);
+        const weekIndex = Math.floor(diffDays/7);
+        if(weekIndex>=0 && weekIndex % interval === 0) dates.push(isoDate(d));
+      }
+      d.setDate(d.getDate()+1);
+    }
+    return dates;
+  }
+  if(durationMode==='month'){
+    if(!monthValue) return [];
+    const [y,m] = monthValue.split('-').map(Number);
+    const dates=[];
+    const last = new Date(y, m, 0).getDate();
+    for(let day=1; day<=last; day++){
+      const d = new Date(y, m-1, day);
+      const wd = d.getDay();
+      if(wd!==0 && wd!==6) dates.push(isoDate(d));
+    }
+    return dates;
+  }
+  return [selectedDate];
+}
+function effectiveDurationDates(){
+  return computeDurationDates();
+}
+function toggleWeekday(dow){
+  const idx = multiWeekdays.indexOf(dow);
+  if(idx>=0) multiWeekdays.splice(idx,1);
+  else multiWeekdays.push(dow);
+  showDurationPreview = false;
+  showMultiBlockedDays = false;
+  renderModal();
+}
+function setRepeatInterval(v){
+  multiRepeatInterval = Math.max(1, parseInt(v,10)||1);
+  showDurationPreview = false;
+  showMultiBlockedDays = false;
+  renderModal();
+}
+function setDurationMode(mode){
+  durationMode = mode;
+  if(mode==='multi'){
+    if(!multiFrom || !multiTo){ multiFrom = selectedDate; multiTo = selectedDate; }
+    if(!multiWeekdays.length){ multiWeekdays = [new Date(multiFrom+'T00:00:00').getDay()]; }
+  }
+  if(mode==='month' && !monthValue){ monthValue = selectedDate.slice(0,7); }
+  collisionTriggered = false;
+  showDurationPreview = false;
+  showMultiBlockedDays = false;
+  renderModal();
+}
+function setDayLengthMode(mode){
+  dayLengthMode = mode;
+  if(mode==='half' && !halfDayHours){ halfDayHours = defaultHalfDayHours(SHIFTS[bookingShift]); }
+  renderModal();
+}
+function setHalfDayHours(v){
+  const slot = SHIFTS[bookingShift];
+  const maxH = Math.max(0.5, shiftDurationHours(slot) - 0.5); // must stay shorter than the full shift
+  let h = parseFloat(v);
+  if(isNaN(h)) h = defaultHalfDayHours(slot);
+  h = Math.min(Math.max(h, 0.5), maxH);
+  halfDayHours = h;
+  renderModal();
+}
+function setMultiFrom(v){ multiFrom = v; if(multiTo && multiTo < v) multiTo = v; showDurationPreview = false; showMultiBlockedDays = false; renderModal(); }
+function setMultiTo(v){ multiTo = v; if(multiFrom && multiFrom > v) multiFrom = v; showDurationPreview = false; showMultiBlockedDays = false; renderModal(); }
+function setMonthValue(v){ monthValue = v; showDurationPreview = false; renderModal(); }
+function toggleMultiBlockedDays(){ showMultiBlockedDays = !showMultiBlockedDays; renderModal(); }
+function toggleDurationPreview(){ showDurationPreview = !showDurationPreview; renderModal(); }
+function durationDateStatus(seat, targetId, date){
+  const targetBooking = activeBookingsFor(targetId, date)[0];
+  if(targetBooking) return targetBooking.seatId===seat.id ? 'already-booked' : 'already-booked-other-seat';
+  return seatStatusOnDate(seat, date);
+}
+function renderModal(){
+  if(bookingConfirmed && lastConfirmedBooking){
+    const c = lastConfirmedBooking;
+    const d0 = new Date(c.dates[0]+'T00:00:00');
+    const rangeLabel = c.dates.length>1
+      ? `${fmtDateShort(d0)} – ${fmtDateShort(new Date(c.dates[c.dates.length-1]+'T00:00:00'))}`
+      : fmtDateShort(d0);
+    document.getElementById('modalBody').innerHTML = `
+      <div style="text-align:center;padding:4px 0 6px;">
+        <div style="font-size:38px;line-height:1;margin-bottom:8px;">✅</div>
+        <h3 style="margin-bottom:2px;">Booking confirmed</h3>
+        <p class="sub">${c.slotLabel} · ${rangeLabel}</p>
+      </div>
+      <div class="modal-row"><span>Seat</span><span class="mono" style="font-weight:400;">${c.seatId}</span></div>
+      <div class="modal-row"><span>Workspace</span><span>${c.workspace}</span></div>
+      <div class="modal-row"><span>Location</span><span>${c.company} · ${c.location} · ${c.building} · ${c.floor}</span></div>
+      <div class="modal-row"><span>Booked for</span><span>${c.targetName}</span></div>
+      <div class="modal-row"><span>Days booked</span><span>${c.dates.length} of ${c.requestedCount}</span></div>
+      <div class="modal-row"><span>Shift</span><span>${c.startTime} – ${c.endTime}</span></div>
+      <div class="modal-row"><span>Check-in by</span><span>${checkinDeadlineHour}:00 AM each day</span></div>
+      ${c.skipped.length ? `<div class="banner banner-warn" style="margin-top:12px;">${c.skipped.length} day(s) skipped: ${c.skipped.map(x=>fmtDateShort(new Date(x+'T00:00:00'))).join(', ')}</div>` : ''}
+      <div class="modal-actions">
+        <button class="btn btn-primary" style="flex:1;" onclick="closeModal()">Done</button>
+      </div>
+    `;
+    return;
+  }
+  const seat = seats.find(s=>s.id===pendingSeat);
+  const target = bookingTargetObj();
+  const rawRangeDates = computeDurationDates(); // full range (multi: every weekday in From–To)
+  const targetDates = effectiveDurationDates(); // multi: only user-checked days; others: same as raw
+  const dateStatuses = rawRangeDates.map(dt=>({date:dt, status:durationDateStatus(seat, target.id, dt)}));
+  const targetDateStatuses = targetDates.map(dt=>({date:dt, status:durationDateStatus(seat, target.id, dt)}));
+  const availableDates = targetDateStatuses.filter(x=>x.status==='available');
+  const skippedOwnDates = targetDateStatuses.filter(x=>x.status==='already-booked' || x.status==='already-booked-other-seat');
+  const slot = SHIFTS[bookingShift];
+  const statusLabel = {held:'Already booked', occupied:'Occupied', vip:'Reserved', oos:'Out of service', 'already-booked':'Already booked by you', 'already-booked-other-seat':'Already booked by you on another seat'};
+  const maxHalfHours = Math.max(0.5, shiftDurationHours(slot) - 0.5);
+  const effStart = slot.start;
+  const effEnd = dayLengthMode==='half' ? addHoursToTime(slot.start, halfDayHours) : slot.end;
+
+  const modeBtn = (mode,label) => `<button type="button" class="dur-mode-btn ${durationMode===mode?'active':''}" onclick="setDurationMode('${mode}')">${label}</button>`;
+  const lengthBtn = (mode,label) => `<button type="button" class="dur-mode-btn ${dayLengthMode===mode?'active':''}" onclick="setDayLengthMode('${mode}')">${label}</button>`;
+
+  let rangeControls = '';
+  if(durationMode==='multi'){
+    const okRows = dateStatuses.filter(x=>x.status==='available');
+    const blockedRows = dateStatuses.filter(x=>x.status!=='available');
+    const rowHtml = x => `<div class="dur-preview-row ${x.status==='available'?'ok':'blocked'}">
+          <span>${new Date(x.date+'T00:00:00').toLocaleDateString('en-IN',{weekday:'short'})} ${fmtDateShort(new Date(x.date+'T00:00:00'))}</span>
+          <span>${x.status==='available' ? 'Open' : statusLabel[x.status]}</span>
+        </div>`;
+    const dayPreview = dateStatuses.length ? `
+      <div class="dur-preview" style="margin-top:10px;">
+        ${okRows.map(rowHtml).join('')}
+        ${(showMultiBlockedDays ? blockedRows : []).map(rowHtml).join('')}
+      </div>
+      ${blockedRows.length ? `<button type="button" class="dur-preview-toggle" onclick="toggleMultiBlockedDays()">${showMultiBlockedDays ? 'Hide' : 'Show'} ${blockedRows.length} unavailable day${blockedRows.length>1?'s':''}</button>` : ''}
+      ` : `<div class="subtle-note" style="margin-top:6px;">Pick at least one day of the week to see dates here.</div>`;
+    rangeControls = `
+      <div class="dur-range-row" style="flex-wrap:nowrap;gap:8px;">
+        <label style="min-width:0;flex:1 1 32%;">Starts <input type="date" style="width:100%;padding:8px 6px;" value="${multiFrom||selectedDate}" onchange="setMultiFrom(this.value)"></label>
+        <label style="min-width:0;flex:0 1 26%;">Repeat every
+          <div style="display:flex;align-items:center;gap:4px;">
+            <input type="number" min="1" value="${multiRepeatInterval}" style="width:40px;padding:8px 6px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:12.5px;color:var(--ink);" onchange="setRepeatInterval(this.value)">
+            <span style="font-size:11px;color:var(--ink-soft);white-space:nowrap;">wk</span>
+          </div>
+        </label>
+        <label style="min-width:0;flex:1 1 32%;">Until <input type="date" style="width:100%;padding:8px 6px;" value="${multiTo||selectedDate}" onchange="setMultiTo(this.value)"></label>
+      </div>
+      <div class="weekday-picker" style="margin-top:8px;">
+        ${WEEKDAY_LABELS.map(w=>`<button type="button" class="weekday-chip ${multiWeekdays.includes(w.n)?'active':''}" onclick="toggleWeekday(${w.n})">${w.l}</button>`).join('')}
+      </div>
+      <div class="subtle-note" style="margin-top:2px;">Select the day(s) of the week to repeat — e.g. pick <b>M</b> to book only Mondays from Starts through Until.</div>
+      ${dayPreview}`;
+  } else if(durationMode==='month'){
+    rangeControls = `
+      <div class="dur-range-row">
+        <label>Month <input type="month" value="${monthValue}" onchange="setMonthValue(this.value)"></label>
+      </div>`;
+  }
+
+  const dateSummary = targetDates.length===0 ? '—'
+    : targetDates.length===1 ? fmtDateShort(new Date(targetDates[0]+'T00:00:00'))
+    : `${fmtDateShort(new Date(targetDates[0]+'T00:00:00'))} – ${fmtDateShort(new Date(targetDates[targetDates.length-1]+'T00:00:00'))} (${targetDates.length} day${targetDates.length>1?'s':''} selected)`;
+
+  const previewToggleHtml = durationMode==='month' && targetDates.length > 1 ? `
+    <button type="button" class="dur-preview-toggle" onclick="toggleDurationPreview()">${showDurationPreview ? 'Hide day-by-day availability' : 'Show day-by-day availability'}</button>
+  ` : '';
+
+  const previewHtml = showDurationPreview && durationMode==='month' && targetDates.length > 1 ? `
+    <div class="dur-preview">
+      ${targetDateStatuses.map(x=>`<div class="dur-preview-row ${x.status==='available'?'ok':'blocked'}">
+        <span>${fmtDateShort(new Date(x.date+'T00:00:00'))}</span>
+        <span>${x.status==='available' ? 'Open' : statusLabel[x.status]}</span>
+      </div>`).join('')}
+    </div>` : '';
+
+  document.getElementById('modalBody').innerHTML = `
+    <h3>Confirm your seat</h3>
+    <p class="sub">${seat.zone} · ${seat.id}</p>
+    <div class="dur-mode-row">
+      ${lengthBtn('full',`Full day · ${slot.start}–${slot.end}`)}
+      ${lengthBtn('half','Half day')}
+    </div>
+    ${dayLengthMode==='half' ? `
+    <div class="dur-range-row" style="margin-top:8px;">
+      <label style="flex:1 1 100%;">Hours needed (max ${maxHalfHours}h)
+        <input type="number" min="0.5" max="${maxHalfHours}" step="0.5" value="${halfDayHours}"
+          style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:12.5px;color:var(--ink);"
+          onchange="setHalfDayHours(this.value)">
+      </label>
+    </div>
+    <div class="subtle-note" style="margin-top:4px;">Seat will be held ${effStart}–${effEnd} (${halfDayHours}h of the ${slot.label} shift).</div>
+    ` : ''}
+    <div class="dur-mode-row" style="margin-top:10px;">
+      ${modeBtn('single','Single Day')}
+      ${modeBtn('multi','Multi-Day')}
+      ${modeBtn('month','Month')}
+    </div>
+    ${rangeControls}
+    <div class="modal-row"><span>Booking for</span><span>${target.name}</span></div>
+    <div class="modal-row"><span>Date${targetDates.length>1?'s':''}</span><span>${dateSummary}</span></div>
+    <div class="modal-row"><span>Shift</span><span>${slot.label}${dayLengthMode==='half'?' · Half day':''} · ${effStart}–${effEnd}</span></div>
+    <div class="modal-row"><span>Location</span><span>${ORG_COMPANY} · ${selectedLocation} · ${selectedBuilding} · ${selectedFloorName}</span></div>
+    <div class="modal-row"><span>Check-in by</span><span>${checkinDeadlineHour}:00 AM each day</span></div>
+    ${targetDates.length>1 ? `<div class="modal-row"><span>Availability</span><span>${availableDates.length} of ${targetDates.length} selected day(s) open</span></div>` : ''}
+    ${skippedOwnDates.length ? `<div class="banner banner-info" style="margin-top:12px;">${skippedOwnDates.length} day(s) already booked by you will be skipped automatically.</div>` : ''}
+    ${previewToggleHtml}
+    ${previewHtml}
+    ${collisionTriggered ? `<div class="banner banner-danger" style="margin-top:12px;">⛔ Seat just booked by another employee — pick another seat. Map has refreshed.</div>` : ''}
+    ${(!collisionTriggered && targetDates.length>0 && availableDates.length===0) ? `<div class="banner banner-danger" style="margin-top:12px;">⛔ No open days in this range for this seat.</div>` : ''}
+    ${(targetDates.length===0) ? `<div class="banner banner-danger" style="margin-top:12px;">⛔ Pick a valid date range${durationMode==='multi'?' and select at least one day of the week':''}.</div>` : ''}
+    <div class="modal-actions">
+      <button class="btn btn-primary" id="confirmBtn" onclick="confirmBooking()" ${(collisionTriggered || availableDates.length===0) ? 'disabled' : ''}>Confirm ${availableDates.length>1?availableDates.length+'-day booking':'booking'}</button>
+    </div>
+    <div class="modal-sim">
+      <button class="btn btn-ghost btn-sm" onclick="simulateCollision()" ${collisionTriggered?'disabled':''}>⚡ Demo: simulate another employee grabbing this seat first</button>
+    </div>
+  `;
+}
+function simulateCollision(){
+  if(collisionTriggered) return;
+  const otherEmp = employees.find(e=>e.id!=='praphul' && !e.restrictedUntil).id;
+  mkBooking(pendingSeat, otherEmp, selectedDate, 'held');
+  collisionTriggered = true;
+  renderModal();
+  toast('Concurrent booking detected — first request to complete the transaction wins.','warn');
+}
+function confirmBooking(){
+  if(collisionTriggered){ toast('Please pick a different seat.','bad'); return; }
+  const seat = seats.find(s=>s.id===pendingSeat);
+  const target = bookingTargetObj();
+  const targetDates = effectiveDurationDates();
+  if(!targetDates.length){ toast(durationMode==='multi' ? 'Select at least one day of the week to book.' : 'Pick a valid date range.','bad'); return; }
+  const dateStatuses = targetDates.map(dt=>({date:dt, status:durationDateStatus(seat, target.id, dt)}));
+  const availableDates = dateStatuses.filter(x=>x.status==='available').map(x=>x.date);
+  const skipped = dateStatuses.filter(x=>x.status!=='available').map(x=>x.date);
+  if(!availableDates.length){
+    collisionTriggered = true; renderModal();
+    toast('No open days in this range — please pick another seat or date range.','bad');
+    return;
+  }
+  const slot = SHIFTS[bookingShift];
+  const effStart = slot.start;
+  const effEnd = dayLengthMode==='half' ? addHoursToTime(slot.start, halfDayHours) : slot.end;
+  const lengthLabel = dayLengthMode==='half' ? `Half day (${halfDayHours}h)` : 'Full day';
+  const modeLabel = durationMode==='multi' ? `Multi-Day booking · ${slot.label} shift · ${lengthLabel}`
+    : durationMode==='month' ? `Month booking · ${slot.label} shift · ${lengthLabel}`
+    : `${slot.label} shift · ${lengthLabel}`;
+  const groupId = 'GRP-'+(groupSeq++);
+  availableDates.forEach(dt=>mkBooking(pendingSeat, target.id, dt, 'held', {
+    groupId, slotLabel: modeLabel, startTime: effStart, endTime: effEnd
+  }));
+  lastConfirmedBooking = {
+    seatId: pendingSeat,
+    workspace: seat.zone,
+    company: ORG_COMPANY,
+    location: selectedLocation || LOCATIONS[0],
+    building: selectedBuilding || seat.building,
+    floor: selectedFloorName || seat.floor,
+    targetName: target.name,
+    dates: availableDates,
+    requestedCount: targetDates.length,
+    skipped,
+    slotLabel: modeLabel,
+    startTime: effStart,
+    endTime: effEnd
+  };
+  bookingConfirmed = true;
+  renderModal();
+  renderBooking(); renderMyBookings();
+}
+function setModalWide(isWide){
+  const el = document.getElementById('modalShell');
+  if(el) el.classList.toggle('modal-wide', !!isWide);
+}
+function closeModal(){
+  document.getElementById('modalBackdrop').classList.remove('active');
+  pendingSeat = null; collisionTriggered = false; bookingConfirmed = false; lastConfirmedBooking = null;
+  pendingCabinRoom = null; cabinRoomConfirmed = false;
+  hrEditEmpId = null;
+  showDurationPreview = false;
+  setModalWide(false);
+}
+
+function renderCabinRequestsSection(){
+  const p = personaObj();
+  const mine = cabinRoomBookings
+    .filter(b=>b.empId===p.id || (b.attendeeIds && b.attendeeIds.includes(p.id)))
+    .sort((a,b)=>a.date.localeCompare(b.date));
+  if(!mine.length) return '';
+  const rows = mine.map(b=>{
+    const loc = findCabinLocation(b.cabinId);
+    const cabinName = loc ? loc.cabin.name : b.cabinId;
+    const locLabel = loc ? `${loc.building} · ${loc.floor}` : '—';
+    const pillClass = {pending_approval:'pill-held', confirmed:'pill-checked', rejected:'pill-cancelled'}[b.status] || 'pill-checked';
+    const pillLabel = {pending_approval:'Pending Approval', confirmed:'Booked', rejected:'Cancelled'}[b.status] || b.status;
+    const isOrganizer = b.empId===p.id;
+    const canCancel = isOrganizer && b.status!=='rejected';
+    const actions = canCancel
+      ? `<button class="btn btn-ghost btn-sm" onclick="cancelCabinBooking('${b.id}')">Cancel</button>`
+      : (isOrganizer ? `<span style="color:var(--ink-faint);font-size:11.5px;">—</span>` : `<span style="color:var(--ink-faint);font-size:11.5px;">Invited</span>`);
+    return `<tr>
+      <td class="mono">${b.id}</td>
+      <td>${cabinName}</td>
+      <td>${locLabel}</td>
+      <td>${fmtDateShort(new Date(b.date+'T00:00:00'))}</td>
+      <td>${roomBookingRangeLabel(b.startTime, b.endTime)}</td>
+      <td style="font-size:11.5px;">${b.meetingName || '—'}</td>
+      <td style="font-size:11.5px;color:var(--ink-soft);max-width:180px;">${b.reason || '—'}</td>
+      <td><span class="status-pill ${pillClass}">${pillLabel}</span></td>
+      <td style="white-space:nowrap;">${actions}</td>
+    </tr>`;
+  }).join('');
+  return `
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-pad" style="padding-bottom:0;"><span class="section-tag">Meeting / Cabin Booking History</span></div>
+      <table>
+        <thead><tr><th>Booking ID</th><th>Room</th><th>Location</th><th>Date</th><th>Time</th><th>Meeting</th><th>Reason / Agenda</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+}
+function cancelCabinBooking(id){
+  const b = cabinRoomBookings.find(x=>x.id===id);
+  if(!b) return;
+  const loc = findCabinLocation(b.cabinId);
+  b.status = 'rejected';
+  b.rejectionReason = 'Cancelled by organizer';
+  toast(`${loc ? loc.cabin.name : b.cabinId} booking cancelled — room released.`, 'info');
+  renderMyBookings(); renderBooking();
+}
+function renderMyBookings(){
+  const p = personaObj();
+  const mine = bookings.filter(b=>b.empId===p.id).sort((a,b)=>a.date.localeCompare(b.date));
+  const cabinSection = renderCabinRequestsSection();
+  if(mine.length===0){
+    document.getElementById('view-mybookings').innerHTML = `
+      <div class="page-head"><h2>My Bookings</h2><p>Everything you've booked this week.</p></div>
+      ${cabinSection}
+      <div class="card"><div class="empty-state"><div class="e-icon">🪑</div>No bookings yet this week.<br><button class="btn btn-primary" style="margin-top:14px;" onclick="showView('booking')">Book a seat</button></div></div>`;
+    return;
+  }
+  const rows = mine.map(b=>{
+    const seat = seats.find(s=>s.id===b.seatId);
+    const d = new Date(b.date+'T00:00:00');
+    const isToday = b.date===todayStr;
+    const pillClass = {held:'pill-held',checked_in:'pill-checked',cancelled:'pill-cancelled',no_show:'pill-noshow'}[b.status];
+    const pillLabel = {held:'Booked',checked_in:'Checked in',cancelled:'Cancelled',no_show:'No-show'}[b.status];
+    const seriesCount = b.groupId ? bookings.filter(x=>x.groupId===b.groupId && x.status==='held').length : 1;
+    let actions = '';
+    if(b.status==='held'){
+      if(isToday && simTime <= b.checkinDeadline){
+        if(isScannedInToday(p.id)){
+          actions += `<button class="btn btn-primary btn-sm" onclick="checkInBooking('${b.id}')">Check in</button> `;
+        } else {
+          actions += `<span style="color:var(--amber);font-size:11.5px;">🪪 Scan ID card / biometric at office entry to check in</span> `;
+        }
+      } else if(isToday){
+        actions += `<span style="color:var(--red);font-size:11.5px;">Window closed</span> `;
+      } else {
+        actions += `<span style="color:var(--ink-faint);font-size:11.5px;">Check-in opens on the day</span> `;
+      }
+      actions += `<button class="btn btn-ghost btn-sm" onclick="cancelBooking('${b.id}')">Cancel</button>`;
+      if(seriesCount>1){
+        actions += ` <button class="btn btn-ghost btn-sm" onclick="cancelBookingSeries('${b.groupId}')">Cancel series (${seriesCount})</button>`;
+      }
+    }
+    return `<tr>
+      <td class="mono">${b.id}</td>
+      <td class="mono" style="font-weight:400;">${seat.id}</td>
+      <td>${seat.zone}</td>
+      <td>${fmtDateShort(d)}</td>
+      <td>${b.slotLabel}<br><span style="color:var(--ink-faint);font-size:11px;">${b.startTime}–${b.endTime}</span></td>
+      <td><span class="status-pill ${pillClass}">${pillLabel}</span></td>
+      <td style="white-space:nowrap;">${actions}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('view-mybookings').innerHTML = `
+    <div class="page-head"><h2>My Bookings</h2><p>Up to ${maxBookingsPerWeek} active bookings per week. One seat per day.</p></div>
+    ${isScannedInToday(p.id)
+      ? `<div class="banner banner-info">🪪 You're scanned in for today (${officeScanTime(p.id)}) — check-in is available for today's booking.</div>`
+      : `<div class="banner banner-warn">🪪 You haven't scanned your ID card / biometric at the office entry yet today — check-in will unlock once you do. <button class="btn btn-ghost btn-sm" style="margin-left:6px;" onclick="scanOfficeEntry()">Simulate scan now</button></div>`
+    }
+    ${cabinSection}
+    <div class="card"><table>
+      <thead><tr><th>Booking ID</th><th>Seat</th><th>Zone</th><th>Date</th><th>Duration</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>
+  `;
+}
+function checkInBooking(id){
+  const b = bookings.find(x=>x.id===id);
+  if(simTime > b.checkinDeadline){ toast('Check-in window has closed for this booking.','bad'); return; }
+  if(!isScannedInToday(b.empId)){ toast('Scan your ID card / biometric at the office entry before checking in.','bad'); return; }
+  b.status='checked_in';
+  toast(`Checked in to ${b.seatId}. Enjoy the day!`,'good');
+  renderMyBookings(); renderBooking();
+}
+function cancelBooking(id){
+  const b = bookings.find(x=>x.id===id);
+  b.status='cancelled';
+  toast(`Booking ${b.id} cancelled — seat released immediately.`,'info');
+  renderMyBookings(); renderBooking();
+}
+function cancelBookingSeries(groupId){
+  const affected = bookings.filter(b=>b.groupId===groupId && b.status==='held');
+  affected.forEach(b=>{ b.status='cancelled'; });
+  toast(`Cancelled ${affected.length} day(s) in this booking series.`,'info');
+  renderMyBookings(); renderBooking();
+}
+
+/* =========================================================
+   HR MANAGEMENT (replaces Admin + old HR Insights)
+========================================================= */
+let hrCurrentTab = 'employees'; // 'employees' | 'buildings' | 'floors' | 'seats' | 'bookings'
+
+// State for HR forms
+let hrEmpForm = {id:'', name:'', building:BUILDINGS[0], floor:FLOORS[0], team:TEAMS[0], shift:'normal'};
+let hrEditEmpId = null;
+let hrEditEmpForm = {name:'', building:BUILDINGS[0], floor:FLOORS[0], team:TEAMS[0], shift:'normal'};
+let hrBldgForm = {name:''};
+let hrEditBldg = null;
+let hrFloorForm = {building:BUILDINGS[0], name:''};
+let hrEditFloorKey = null;
+
+function renderHREmployees(){
+  const today = todayStr;
+  const empRows = employees.map(e=>{
+    const restricted = e.restrictedUntil && e.restrictedUntil>=today;
+    return `<tr>
+      <td class="mono" style="font-size:11px;">${e.id}</td>
+      <td>${e.name}</td>
+      <td>${e.team || 'Unassigned'}</td>
+      <td>${e.assignedBuilding || '—'}</td>
+      <td>${e.assignedFloor || '—'}</td>
+      <td>${SHIFTS[e.shift||'normal'] ? SHIFTS[e.shift||'normal'].label : 'Normal'} <span style="color:var(--ink-faint);font-size:10.5px;">(${(SHIFTS[e.shift||'normal']||SHIFTS.normal).start}–${(SHIFTS[e.shift||'normal']||SHIFTS.normal).end})</span></td>
+      <td>${restricted?`<span class="status-pill pill-restricted">Suspended</span>`:`<span class="status-pill pill-ok">Active</span>`}</td>
+      <td style="white-space:nowrap;">
+        <button class="btn btn-ghost btn-sm" onclick="hrOpenEditEmpModal('${e.id}')">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="hrDeleteEmp('${e.id}')">Delete</button>
+      </td>
+    </tr>`;
+  }).join('');
+
+  const bldgOptions = BUILDINGS.map(b=>`<option value="${b}" ${hrEmpForm.building===b?'selected':''}>${b}</option>`).join('');
+  const floorOptions = FLOORS.map(f=>`<option value="${f}" ${hrEmpForm.floor===f?'selected':''}>${f}</option>`).join('');
+  const teamOptions = TEAMS.map(t=>`<option value="${t}" ${hrEmpForm.team===t?'selected':''}>${t}</option>`).join('');
+  const shiftOptions = SHIFT_ORDER.map(s=>`<option value="${s}" ${hrEmpForm.shift===s?'selected':''}>${SHIFTS[s].label} (${SHIFTS[s].start}–${SHIFTS[s].end})</option>`).join('');
+
+  document.getElementById('view-hr').innerHTML = `
+    <div class="page-head"><h2>HR · Employee Management</h2><p>Manage employees and their assigned building, floor, and shift.</p></div>
+    <div class="hr-tab-bar">
+      <button class="hr-tab active" onclick="showView('hr-employees')">Employees</button>
+      <button class="hr-tab" onclick="showView('hr-buildings')">Buildings & Floors</button>
+      <button class="hr-tab" onclick="showView('hr-seats')">Seat Management</button>
+      <button class="hr-tab" onclick="showView('hr-bookings')">Booking Management</button>
+    </div>
+    <div class="card card-pad" style="margin-bottom:16px;">
+      <span class="section-tag">Add Employee</span>
+      <div class="hr-form-row">
+        <div class="hr-form-group"><label>Employee ID</label><input id="hrEmpId" value="${hrEmpForm.id}" placeholder="e.g. john.doe" oninput="hrEmpForm.id=this.value"></div>
+        <div class="hr-form-group"><label>Full Name</label><input id="hrEmpName" value="${hrEmpForm.name}" placeholder="Full name" oninput="hrEmpForm.name=this.value"></div>
+        <div class="hr-form-group"><label>Team</label><select id="hrEmpTeam" onchange="hrEmpForm.team=this.value">${teamOptions}</select></div>
+        <div class="hr-form-group"><label>Assigned Building</label><select id="hrEmpBldg" onchange="hrEmpForm.building=this.value">${bldgOptions}</select></div>
+        <div class="hr-form-group"><label>Assigned Floor</label><select id="hrEmpFloor" onchange="hrEmpForm.floor=this.value">${floorOptions}</select></div>
+        <div class="hr-form-group"><label>Shift</label><select id="hrEmpShift" onchange="hrEmpForm.shift=this.value">${shiftOptions}</select></div>
+        <div style="display:flex;gap:6px;align-items:flex-end;">
+          <button class="btn btn-primary" onclick="hrAddEmp()">Add Employee</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-pad" style="padding-bottom:0;"><span class="section-tag">All Employees (${employees.length})</span></div>
+      <table>
+        <thead><tr><th>Employee ID</th><th>Name</th><th>Team</th><th>Building</th><th>Floor</th><th>Shift</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody>${empRows || '<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--ink-faint);">No employees found</td></tr>'}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+function hrAddEmp(){
+  const id = document.getElementById('hrEmpId').value.trim().replace(/\s/g,'').toLowerCase();
+  const name = document.getElementById('hrEmpName').value.trim();
+  const team = document.getElementById('hrEmpTeam').value;
+  const building = document.getElementById('hrEmpBldg').value;
+  const floor = document.getElementById('hrEmpFloor').value;
+  const shift = document.getElementById('hrEmpShift').value;
+  if(!id||!name){ toast('Employee ID and Name are required.','bad'); return; }
+  if(employees.find(e=>e.id===id)){ toast('Employee ID already exists.','bad'); return; }
+  employees.push({id, name, dept:'General', team, noShow:0, restrictedUntil:null, assignedBuilding:building, assignedFloor:floor, shift});
+  hrEmpForm = {id:'', name:'', building:BUILDINGS[0], floor:FLOORS[0], team:TEAMS[0], shift:'normal'};
+  toast(`${name} added to ${team} (${SHIFTS[shift].label} shift).`, 'good');
+  renderHREmployees();
+}
+function hrOpenEditEmpModal(id){
+  const e = empById(id);
+  if(!e) return;
+  hrEditEmpId = id;
+  hrEditEmpForm = {name:e.name, building:e.assignedBuilding||BUILDINGS[0], floor:e.assignedFloor||FLOORS[0], team:e.team||TEAMS[0], shift:e.shift||'normal'};
+  setModalWide(false);
+  renderHrEditEmpModal();
+  document.getElementById('modalBackdrop').classList.add('active');
+}
+function renderHrEditEmpModal(){
+  const e = empById(hrEditEmpId);
+  if(!e) return;
+  const bldgOptions = BUILDINGS.map(b=>`<option value="${b}" ${hrEditEmpForm.building===b?'selected':''}>${b}</option>`).join('');
+  const floorOptions = FLOORS.map(f=>`<option value="${f}" ${hrEditEmpForm.floor===f?'selected':''}>${f}</option>`).join('');
+  const teamOptions = TEAMS.map(t=>`<option value="${t}" ${hrEditEmpForm.team===t?'selected':''}>${t}</option>`).join('');
+  const shiftOptions = SHIFT_ORDER.map(s=>`<option value="${s}" ${hrEditEmpForm.shift===s?'selected':''}>${SHIFTS[s].label} (${SHIFTS[s].start}–${SHIFTS[s].end})</option>`).join('');
+  document.getElementById('modalBody').innerHTML = `
+    <h3>Edit employee</h3>
+    <p class="sub">${e.id}</p>
+    <div class="hr-form-group" style="margin-bottom:12px;"><label>Full Name</label><input id="hrEditEmpName" value="${hrEditEmpForm.name.replace(/"/g,'&quot;')}" placeholder="Full name"></div>
+    <div class="hr-form-group" style="margin-bottom:12px;"><label>Team</label><select id="hrEditEmpTeam">${teamOptions}</select></div>
+    <div class="hr-form-group" style="margin-bottom:12px;"><label>Assigned Building</label><select id="hrEditEmpBldg">${bldgOptions}</select></div>
+    <div class="hr-form-group" style="margin-bottom:12px;"><label>Assigned Floor</label><select id="hrEditEmpFloor">${floorOptions}</select></div>
+    <div class="hr-form-group" style="margin-bottom:12px;"><label>Shift</label><select id="hrEditEmpShift">${shiftOptions}</select></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="hrSaveEditEmp()">Save changes</button>
+    </div>
+  `;
+}
+function hrSaveEditEmp(){
+  const e = empById(hrEditEmpId);
+  if(!e) return;
+  const name = document.getElementById('hrEditEmpName').value.trim();
+  const team = document.getElementById('hrEditEmpTeam').value;
+  const building = document.getElementById('hrEditEmpBldg').value;
+  const floor = document.getElementById('hrEditEmpFloor').value;
+  const shift = document.getElementById('hrEditEmpShift').value;
+  if(!name){ toast('Name is required.','bad'); return; }
+  e.name = name; e.team = team; e.assignedBuilding = building; e.assignedFloor = floor; e.shift = shift;
+  closeModal();
+  toast(`${name} updated.`, 'good');
+  renderHREmployees();
+}
+function hrDeleteEmp(id){
+  const e = empById(id);
+  if(!confirm(`Delete ${e.name}? This cannot be undone.`)) return;
+  employees = employees.filter(x=>x.id!==id);
+  toast(`${e.name} removed.`, 'info');
+  renderHREmployees();
+}
+
+function renderHRBuildings(){
+  const bldgRows = BUILDINGS.map(b=>{
+    const floorCount = FLOOR_LAYOUTS[b] ? Object.keys(FLOOR_LAYOUTS[b]).length : 0;
+    const seatCount = seats.filter(s=>s.building===b).length;
+    return `<tr data-building-row="${b}">
+      <td>${b}</td><td>${floorCount} floor(s)</td><td>${seatCount} seat(s)</td>
+      <td><button class="btn btn-danger btn-sm" onclick="hrDeleteBuilding('${b}')">Delete</button></td>
+    </tr>`;
+  }).join('');
+
+  // All floors across all buildings
+  const allFloors = BUILDINGS.flatMap(b=>Object.keys(FLOOR_LAYOUTS[b]||{}).map(f=>({building:b, floor:f})));
+  const floorRows = allFloors.map(({building:b,floor:f})=>`<tr>
+    <td>${b}</td><td>${f}</td><td>${seats.filter(s=>s.building===b&&s.floor===f).length} seat(s)</td>
+    <td><button class="btn btn-danger btn-sm" onclick="hrDeleteFloor('${b}','${f}')">Delete</button>
+  </tr>`).join('');
+
+  const bldgOpts = BUILDINGS.map(b=>`<option value="${b}">${b}</option>`).join('');
+
+  document.getElementById('view-hr').innerHTML = `
+    <div class="page-head"><h2>HR · Building & Floor Management</h2><p>Add, edit, or delete buildings and floors.</p></div>
+    <div class="hr-tab-bar">
+      <button class="hr-tab" onclick="showView('hr-employees')">Employees</button>
+      <button class="hr-tab active" onclick="showView('hr-buildings')">Buildings & Floors</button>
+      <button class="hr-tab" onclick="showView('hr-seats')">Seat Management</button>
+      <button class="hr-tab" onclick="showView('hr-bookings')">Booking Management</button>
+    </div>
+    <div class="grid grid-2" style="margin-bottom:16px;">
+      <div class="card card-pad">
+        <span class="section-tag">Add Building</span>
+        <div class="hr-form-row">
+          <div class="hr-form-group"><label>Building Name</label><input id="hrBldgName" placeholder="e.g. Building 4"></div>
+          <button class="btn btn-primary" style="align-self:flex-end;" onclick="hrAddBuilding()">Add Building</button>
+        </div>
+        <table><thead><tr><th>Building</th><th>Floors</th><th>Seats</th><th>Action</th></tr></thead>
+        <tbody>${bldgRows||'<tr><td colspan="4" style="text-align:center;padding:16px;color:var(--ink-faint);">No buildings</td></tr>'}</tbody></table>
+      </div>
+      <div class="card card-pad">
+        <span class="section-tag">Add Floor</span>
+        <div class="hr-form-row">
+          <div class="hr-form-group"><label>Building</label><select id="hrFloorBldg">${bldgOpts}</select></div>
+          <div class="hr-form-group"><label>Floor Name</label><input id="hrFloorName" placeholder="e.g. Floor 4"></div>
+          <button class="btn btn-primary" style="align-self:flex-end;" onclick="hrAddFloor()">Add Floor</button>
+        </div>
+        <table><thead><tr><th>Building</th><th>Floor</th><th>Seats</th><th>Action</th></tr></thead>
+        <tbody>${floorRows||'<tr><td colspan="4" style="text-align:center;padding:16px;color:var(--ink-faint);">No floors</td></tr>'}</tbody></table>
+      </div>
+    </div>
+  `;
+}
+function hrAddBuilding(){
+  const name = document.getElementById('hrBldgName').value.trim();
+  if(!name){ toast('Building name required.','bad'); return; }
+  if(BUILDINGS.includes(name)){ toast('Building already exists.','bad'); return; }
+  BUILDINGS.push(name);
+  if(!FLOOR_LAYOUTS[name]) FLOOR_LAYOUTS[name] = {};
+  toast(`${name} added.`, 'good');
+  renderHRBuildings();
+}
+function hrDeleteBuilding(name){
+  if(!confirm(`Delete ${name}? All floors and seats in it will be removed.`)) return;
+  const idx = BUILDINGS.indexOf(name);
+  if(idx>=0) BUILDINGS.splice(idx,1);
+  delete FLOOR_LAYOUTS[name];
+  seats = seats.filter(s=>s.building!==name);
+  delete cabinRooms[name];
+  toast(`${name} removed.`, 'info');
+  renderHRBuildings();
+}
+// Builds a basic default layout for a freshly created floor: cabins on the left
+// and right (same pattern as existing floors), plain seat zones in the middle.
+// Every generated seat/cabin starts Blocked so HR must consciously open the floor.
+function generateDefaultFloorLayout(building, floorName){
+  const bldgIdx = BUILDINGS.indexOf(building) + 1;
+  const floorTag = floorName.replace(/[^A-Za-z0-9]/g,'').toUpperCase().slice(0,6) || 'FLR';
+  const prefixBase = `B${bldgIdx}${floorTag}`;
+  const zoneConfigs = [
+    {prefix:`${prefixBase}-GENA`, count:ROW_COUNT, zone:'General Pod A', dept:'General'},
+    {prefix:`${prefixBase}-GENB`, count:ROW_COUNT, zone:'General Pod B', dept:'General'}
+  ];
+  const cabins = [
+    {id:`CAB-${prefixBase}-1`, name:'Meeting Room 1', side:'left', seatType:'cabin', hrStatus:'blocked'},
+    {id:`CAB-${prefixBase}-2`, name:'Meeting Room 2', side:'left', seatType:'cabin', hrStatus:'blocked'},
+    {id:`CAB-${prefixBase}-3`, name:'Meeting Room 3', side:'right', seatType:'cabin', hrStatus:'blocked'},
+    {id:`CAB-${prefixBase}-4`, name:'Meeting Room 4', side:'right', seatType:'cabin', hrStatus:'blocked'}
+  ];
+  return {zoneConfigs, cabins};
+}
+function hrAddFloor(){
+  const bldg = document.getElementById('hrFloorBldg').value;
+  const fname = document.getElementById('hrFloorName').value.trim();
+  if(!fname){ toast('Floor name required.','bad'); return; }
+  if(!FLOOR_LAYOUTS[bldg]) FLOOR_LAYOUTS[bldg] = {};
+  if(FLOOR_LAYOUTS[bldg][fname]){ toast('Floor already exists in this building.','bad'); return; }
+
+  const {zoneConfigs, cabins} = generateDefaultFloorLayout(bldg, fname);
+  FLOOR_LAYOUTS[bldg][fname] = zoneConfigs;
+
+  // Generate the actual seat records for the new floor and drop them straight
+  // into the shared `seats` array so they show up in Seat Management immediately —
+  // no manual sync step required. All generated seats start Blocked.
+  zoneConfigs.forEach(cfg=>{
+    workspaceMeta[cfg.zone] = `${cfg.dept} · ${bldg} · ${fname}`;
+    const newSeats = zoneSeats(cfg.prefix, cfg.count, cfg.zone, cfg.dept, bldg, fname, LOCATIONS[0], 0, [], 'normal', []);
+    newSeats.forEach(s=>{ s.hrStatus = 'blocked'; });
+    seats.push(...newSeats);
+  });
+
+  // Generate the default cabins (left/right), also Blocked until HR opens them up.
+  if(!cabinRooms[bldg]) cabinRooms[bldg] = {};
+  cabinRooms[bldg][fname] = cabins;
+
+  toast(`${fname} added to ${bldg} with a default layout. All seats start Blocked — update statuses in Seat Management when ready.`, 'good');
+  renderHRBuildings();
+}
+function hrDeleteFloor(bldg, floor){
+  if(!confirm(`Delete ${floor} in ${bldg}?`)) return;
+  if(FLOOR_LAYOUTS[bldg]) delete FLOOR_LAYOUTS[bldg][floor];
+  seats = seats.filter(s=>!(s.building===bldg && s.floor===floor));
+  if(cabinRooms[bldg]) delete cabinRooms[bldg][floor];
+  toast(`${floor} removed from ${bldg}.`, 'info');
+  renderHRBuildings();
+}
+
+function renderHRSeats(){
+  const today = todayStr;
+  // Show seats with HR status controls
+  const bldgOpts = BUILDINGS.map(b=>`<option value="${b}">${b}</option>`).join('');
+  const seatRows = seats.map(s=>{
+    const dynStatus = seatStatusOnDate(s, today);
+    const hrStatus = s.hrStatus || 'available';
+    const booking = bookings.find(b=>b.seatId===s.id && b.date===today && (b.status==='held'||b.status==='checked_in'));
+    const occupant = booking ? empById(booking.empId)?.name : '—';
+    return `<tr data-hrseat-row="${s.id}">
+      <td class="mono" style="font-size:11px;">${s.id}</td>
+      <td>${s.zone}</td>
+      <td>${s.building} · ${s.floor}</td>
+      <td>
+        <select onchange="hrSetSeatStatus('${s.id}',this.value)" style="font-size:11.5px;padding:4px 6px;width:auto;">
+          <option value="available" ${hrStatus==='available'?'selected':''}>Available</option>
+          <option value="blocked" ${hrStatus==='blocked'?'selected':''}>Blocked</option>
+          <option value="maintenance" ${hrStatus==='maintenance'?'selected':''}>Under Maintenance</option>
+        </select>
+      </td>
+      <td>${occupant}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('view-hr').innerHTML = `
+    <div class="page-head"><h2>HR · Seat Management</h2><p>Control seat availability — mark as Available, Blocked, or Under Maintenance.</p></div>
+    <div class="hr-tab-bar">
+      <button class="hr-tab" onclick="showView('hr-employees')">Employees</button>
+      <button class="hr-tab" onclick="showView('hr-buildings')">Buildings & Floors</button>
+      <button class="hr-tab active" onclick="showView('hr-seats')">Seat Management</button>
+      <button class="hr-tab" onclick="showView('hr-bookings')">Booking Management</button>
+    </div>
+    <div class="banner banner-info">Change a seat's HR status to control who can book it. Blocked seats (e.g. CEO Room) are never selectable. Maintenance seats are temporarily unavailable.</div>
+    <div class="card">
+      <div class="card-pad" style="padding-bottom:0;"><span class="section-tag">All Seats (${seats.length})</span></div>
+      <table>
+        <thead><tr><th>Seat ID</th><th>Zone</th><th>Location</th><th>HR Status</th><th>Occupant Today</th></tr></thead>
+        <tbody>${seatRows||'<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--ink-faint);">No seats</td></tr>'}</tbody>
+      </table>
+    </div>
+  `;
+}
+function hrSetSeatStatus(seatId, status){
+  const seat = seats.find(s=>s.id===seatId);
+  if(!seat) return;
+  const old = seat.hrStatus;
+  seat.hrStatus = status;
+  if(status==='blocked' || status==='maintenance'){
+    // auto-cancel active bookings for that seat
+    const today = todayStr;
+    const affected = bookings.filter(b=>b.seatId===seatId && b.date>=today && (b.status==='held'||b.status==='checked_in'));
+    affected.forEach(b=>{ b.status='cancelled'; });
+    if(affected.length) toast(`${affected.length} booking(s) for ${seatId} auto-cancelled.`,'warn');
+  }
+  toast(`${seatId} status changed to ${status}.`, 'info');
+  renderHRSeats();
+}
+
+function renderHRBookings(){
+  const today = todayStr;
+  const pendingCabinReqs = cabinRoomBookings.filter(b=>b.status==='pending_approval').sort((a,b)=>a.date.localeCompare(b.date));
+  const pendingRows = pendingCabinReqs.map(b=>{
+    const loc = findCabinLocation(b.cabinId);
+    const cabinName = loc ? loc.cabin.name : b.cabinId;
+    const emp = empById(b.empId);
+    return `<tr>
+      <td class="mono" style="font-size:11px;">${b.id}</td>
+      <td>${emp ? emp.name : b.empId}</td>
+      <td>${cabinName}</td>
+      <td>${loc ? loc.building : '—'}</td>
+      <td>${loc ? loc.floor : '—'}</td>
+      <td>${fmtDateShort(new Date(b.date+'T00:00:00'))}</td>
+      <td>${roomBookingRangeLabel(b.startTime, b.endTime)}</td>
+      <td style="white-space:nowrap;">
+        <button class="btn btn-primary btn-sm" onclick="hrApproveCabinRequest('${b.id}')">Approve</button>
+        <button class="btn btn-danger btn-sm" onclick="hrRejectCabinRequest('${b.id}')">Reject</button>
+      </td>
+    </tr>`;
+  }).join('');
+  const roomRequestsSection = `
+    <div class="card" style="margin-bottom:18px;">
+      <div class="card-pad" style="padding-bottom:0;"><span class="section-tag">Room Booking Requests — Pending Approval (${pendingCabinReqs.length})</span></div>
+      <table>
+        <thead><tr><th>Request ID</th><th>Employee</th><th>Room</th><th>Building</th><th>Floor</th><th>Date</th><th>Time Slot</th><th>Action</th></tr></thead>
+        <tbody>${pendingRows||'<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--ink-faint);">No pending room requests</td></tr>'}</tbody>
+      </table>
+    </div>`;
+  const allActive = bookings.filter(b=>b.date>=today && (b.status==='held'||b.status==='checked_in')).sort((a,b)=>a.date.localeCompare(b.date));
+  const rows = allActive.map(b=>{
+    const seat = seats.find(s=>s.id===b.seatId);
+    const emp = empById(b.empId);
+    return `<tr>
+      <td class="mono" style="font-size:11px;">${b.id}</td>
+      <td>${emp ? emp.name : b.empId}</td>
+      <td class="mono">${seat ? seat.id : b.seatId}</td>
+      <td>${seat ? `${seat.building} · ${seat.floor}` : '—'}</td>
+      <td>${fmtDateShort(new Date(b.date+'T00:00:00'))}</td>
+      <td>${b.slotLabel}</td>
+      <td><span class="status-pill ${b.status==='checked_in'?'pill-checked':'pill-held'}">${b.status==='checked_in'?'Checked in':'Booked'}</span></td>
+      <td><button class="btn btn-danger btn-sm" onclick="hrForceCancel('${b.id}')">Cancel</button></td>
+    </tr>`;
+  }).join('');
+
+  const depts = ['Engineering','Design','Sales','Ops','Leadership'];
+  const deptRows = depts.map(dep=>{
+    const deptSeats = seats.filter(s=>s.dept===dep && (s.hrStatus||'available')==='available');
+    if(!deptSeats.length) return '';
+    const occ = deptSeats.filter(s=>['held','occupied'].includes(seatStatusOnDate(s,today))).length;
+    const util = Math.round((occ/deptSeats.length)*100);
+    return `<tr><td>${dep}</td><td>${deptSeats.length}</td><td>${occ}</td><td>${util}%</td>
+    <td><div style="background:var(--surface-2);border-radius:6px;height:7px;width:120px;overflow:hidden;">
+      <div style="background:var(--primary);height:7px;width:${util}%;"></div></div></td></tr>`;
+  }).filter(Boolean).join('');
+
+  document.getElementById('view-hr').innerHTML = `
+    <div class="page-head"><h2>HR · Booking Management</h2><p>View, override, and cancel any employee booking. Monitor utilization by department.</p></div>
+    <div class="hr-tab-bar">
+      <button class="hr-tab" onclick="showView('hr-employees')">Employees</button>
+      <button class="hr-tab" onclick="showView('hr-buildings')">Buildings & Floors</button>
+      <button class="hr-tab" onclick="showView('hr-seats')">Seat Management</button>
+      <button class="hr-tab active" onclick="showView('hr-bookings')">Booking Management</button>
+    </div>
+    ${roomRequestsSection}
+    <div class="grid grid-4" style="margin-bottom:18px;">
+      <div class="card kpi-card"><div class="kpi-label">Utilization Today</div><div class="kpi-value">${computeUtilization(today)}%</div><span class="kpi-tag ${computeUtilization(today)>=80?'tag-bad':'tag-good'}">${computeUtilization(today)>=80?'High':'Healthy'}</span></div>
+      <div class="card kpi-card"><div class="kpi-label">Active Bookings</div><div class="kpi-value">${allActive.length}</div><span class="kpi-tag tag-info">From today</span></div>
+      <div class="card kpi-card"><div class="kpi-label">Seats Blocked</div><div class="kpi-value">${seats.filter(s=>s.hrStatus==='blocked').length}</div><span class="kpi-tag tag-warn">By HR</span></div>
+      <div class="card kpi-card"><div class="kpi-label">Under Maintenance</div><div class="kpi-value">${seats.filter(s=>s.hrStatus==='maintenance').length}</div><span class="kpi-tag tag-warn">Seats</span></div>
+    </div>
+    <div class="two-col" style="margin-bottom:18px;">
+      <div class="card">
+        <div class="card-pad" style="padding-bottom:0;"><span class="section-tag">Utilization by department — today</span></div>
+        <table><thead><tr><th>Department</th><th>Seats</th><th>Booked</th><th>Util%</th><th></th></tr></thead><tbody>${deptRows}</tbody></table>
+      </div>
+      <div class="card card-pad">
+        <span class="section-tag">Booking rules</span>
+        <div class="rule-row"><div><div class="r-label">Check-in deadline</div><div class="r-desc">Auto-release if not checked in by this hour</div></div><input type="number" min="7" max="12" value="${checkinDeadlineHour}" onchange="checkinDeadlineHour=parseInt(this.value)" style="width:60px;"> :00</div>
+        <div class="rule-row"><div><div class="r-label">Max bookings / week</div><div class="r-desc">Per employee per week</div></div><input type="number" min="1" max="5" value="${maxBookingsPerWeek}" onchange="maxBookingsPerWeek=parseInt(this.value)" style="width:60px;"></div>
+        <div class="rule-row"><div class="r-label">No-show suspension</div><div class="r-desc">3 no-shows → 1 week suspension</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-pad" style="padding-bottom:0;"><span class="section-tag">Active & upcoming bookings</span></div>
+      <table>
+        <thead><tr><th>Booking ID</th><th>Employee</th><th>Seat</th><th>Location</th><th>Date</th><th>Duration</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody>${rows||'<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--ink-faint);">No active bookings</td></tr>'}</tbody>
+      </table>
+    </div>
+  `;
+}
+function hrApproveCabinRequest(id){
+  const b = cabinRoomBookings.find(x=>x.id===id);
+  if(!b) return;
+  b.status = 'confirmed';
+  const loc = findCabinLocation(b.cabinId);
+  toast(`${loc ? loc.cabin.name : b.cabinId} request approved. Employee has been notified.`, 'good');
+  renderHRBookings(); renderMyBookings(); renderBooking();
+}
+function hrRejectCabinRequest(id){
+  const b = cabinRoomBookings.find(x=>x.id===id);
+  if(!b) return;
+  const reason = prompt('Reason for rejecting this request (optional):') || '';
+  b.status = 'rejected';
+  b.rejectionReason = reason.trim() || null;
+  const loc = findCabinLocation(b.cabinId);
+  toast(`${loc ? loc.cabin.name : b.cabinId} request rejected. The room remains available and the employee has been notified.`, 'info');
+  renderHRBookings(); renderMyBookings(); renderBooking();
+}
+function hrForceCancel(id){
+  const b = bookings.find(x=>x.id===id);
+  if(!b) return;
+  b.status='cancelled';
+  toast(`Booking ${b.id} cancelled by HR.`,'info');
+  renderHRBookings(); renderBooking(); renderMyBookings();
+}
+function forceCancel(id){ hrForceCancel(id); }
+
+/* =========================================================
+   REPORTS / KPIs
+========================================================= */
+let utilChartInstance=null, statusChartInstance=null;
+function renderReports(){
+  const today = todayStr;
+  const util = computeUtilization(today);
+  const btoo = computeBtoO();
+  const noshow = computeNoShowRate();
+
+  document.getElementById('view-reports').innerHTML = `
+    <div class="page-head"><h2>Company Insights</h2><p>Aggregate KPIs the PRD defines success by. No individual data shown here.</p></div>
+    <div class="two-col">
+      <div class="card card-pad">
+        <span class="section-tag">Utilization trend — last 14 days</span>
+        <div class="chart-box"><canvas id="utilChart"></canvas></div>
+      </div>
+      <div class="card card-pad">
+        <span class="section-tag">Today's booking outcomes</span>
+        <div class="chart-box"><canvas id="statusChart"></canvas></div>
+      </div>
+    </div>
+    <div class="footer-note">Sparity Workspace prototype · Data shown is simulated for demo purposes and resets on refresh · Built against PRD v1 (Praphul Parinam)</div>
+  `;
+
+  if(typeof Chart === 'undefined'){
+    document.querySelectorAll('#view-reports .chart-box').forEach(el=>{
+      el.innerHTML = '<div class="empty-state" style="padding:12px;"><div class="e-icon">📊</div>Charts could not load (chart library blocked or unavailable on this network).</div>';
+    });
+    return;
+  }
+
+  const trend = [71,74,69,77,82,64,58,73,76,80,84,79,75,util];
+  const ctx1 = document.getElementById('utilChart');
+  if(utilChartInstance) utilChartInstance.destroy();
+  utilChartInstance = new Chart(ctx1, {
+    type:'line',
+    data:{ labels:trend.map((_,i)=>i===13?'Today':(14-i)+'d ago').reverse(),
+      datasets:[{ data:trend, borderColor:'#2C4870', backgroundColor:'rgba(44,72,112,0.08)', fill:true, tension:.35, pointRadius:2 }]},
+    options:{ plugins:{legend:{display:false}}, scales:{ y:{min:40,max:100,ticks:{callback:v=>v+'%'}} }, responsive:true, maintainAspectRatio:false }
+  });
+
+  const held = bookings.filter(b=>b.date===today&&b.status==='held').length;
+  const checked = bookings.filter(b=>b.date===today&&b.status==='checked_in').length;
+  const cancelled = bookings.filter(b=>b.date===today&&b.status==='cancelled').length;
+  const noshowCt = bookings.filter(b=>b.date===today&&b.status==='no_show').length;
+  const ctx2 = document.getElementById('statusChart');
+  if(statusChartInstance) statusChartInstance.destroy();
+  statusChartInstance = new Chart(ctx2, {
+    type:'doughnut',
+    data:{ labels:['Checked in','Booked (pending)','Cancelled','No-show'],
+      datasets:[{ data:[checked,held,cancelled,noshowCt], backgroundColor:['#2C4870','#C67D1F','#B9C2CE','#C1443A'] }]},
+    options:{ plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:11}}}}, responsive:true, maintainAspectRatio:false, cutout:'62%' }
+  });
+}
+
+function seatBreadcrumb(seat){
+  const zoneLabel = seat.zone || 'Seat';
+  return `Sparity › Madhapur › Floor 3 › ${zoneLabel}`;
+}
+
+/* =========================================================
+   GLOBAL SEARCH — employees, buildings, floors, seat IDs
+========================================================= */
+function onGlobalSearch(value){
+  const term = value.trim().toLowerCase();
+  const resultsEl = document.getElementById('globalSearchResults');
+  const clearBtn = document.getElementById('globalSearchClearBtn');
+  clearBtn.style.display = term ? 'block' : 'none';
+  if(!term){ resultsEl.classList.remove('active'); resultsEl.innerHTML=''; return; }
+
+  // HR search only ever routes to Employee Management, Building Management, or Seat Management.
+  const empMatches = employees.filter(e=>e.id.toLowerCase().includes(term) || e.name.toLowerCase().includes(term)).slice(0,5);
+  const buildingMatches = BUILDINGS.filter(b=>b.toLowerCase().includes(term)).slice(0,5);
+  const seatMatches = seats.filter(s=>s.id.toLowerCase().includes(term)).slice(0,6);
+
+  let html = '';
+  if(empMatches.length){
+    html += `<div class="gsr-group-label">Employees</div>` + empMatches.map(e=>`
+      <div class="gsr-item" onclick="goToSearchResult('employee','${e.id}')">
+        <div><div class="gsr-title">${e.name}</div><div class="gsr-sub">${e.id} · ${e.assignedBuilding||'—'} · ${e.assignedFloor||'—'}</div></div>
+        <span>›</span>
+      </div>`).join('');
+  }
+  if(buildingMatches.length){
+    html += `<div class="gsr-group-label">Buildings</div>` + buildingMatches.map(b=>`
+      <div class="gsr-item" onclick="goToSearchResult('building','${b}')">
+        <div><div class="gsr-title">${b}</div><div class="gsr-sub">Open in Building Management</div></div>
+        <span>›</span>
+      </div>`).join('');
+  }
+  if(seatMatches.length){
+    html += `<div class="gsr-group-label">Seats</div>` + seatMatches.map(s=>`
+      <div class="gsr-item" onclick="goToSearchResult('seat','${s.id}')">
+        <div><div class="gsr-title">${s.id}</div><div class="gsr-sub">${s.zone} · ${s.building} · ${s.floor}</div></div>
+        <span>›</span>
+      </div>`).join('');
+  }
+  if(!html){
+    html = `<div class="gsr-empty">No matches for "${value}"</div>`;
+  }
+  resultsEl.innerHTML = html;
+  resultsEl.classList.add('active');
+}
+function clearGlobalSearch(){
+  const input = document.getElementById('globalSearchInput');
+  input.value = '';
+  onGlobalSearch('');
+  input.focus();
+}
+function closeGlobalSearchResults(){
+  const resultsEl = document.getElementById('globalSearchResults');
+  if(resultsEl) resultsEl.classList.remove('active');
+}
+function goToSearchResult(type, id){
+  closeGlobalSearchResults();
+  const input = document.getElementById('globalSearchInput');
+  if(input) input.value = '';
+  const clearBtn = document.getElementById('globalSearchClearBtn');
+  if(clearBtn) clearBtn.style.display = 'none';
+
+  if(type==='employee'){
+    const emp = empById(id);
+    if(!emp) return;
+    if(currentRole==='hr'){
+      showView('hr-employees');
+      setTimeout(()=>highlightHREmployeeRow(emp.id), 60);
+    } else {
+      toast(`${emp.name} (${emp.id}) is assigned to ${emp.assignedBuilding} · ${emp.assignedFloor}.`, 'info');
+    }
+  } else if(type==='building'){
+    // Building search always opens Building Management — never the booking/floor-plan view.
+    showView('hr-buildings');
+    setTimeout(()=>highlightHRBuildingRow(id), 60);
+  } else if(type==='seat'){
+    // Seat search always opens Seat Management for administrative control — never Book a Seat.
+    const seat = seats.find(s=>s.id===id);
+    if(!seat) return;
+    showView('hr-seats');
+    setTimeout(()=>highlightHRSeatRow(seat.id), 60);
+  }
+}
+function highlightSeat(seatId){
+  const el = document.querySelector(`[data-seat-id="${seatId}"]`);
+  if(!el) return;
+  el.scrollIntoView({behavior:'smooth', block:'center'});
+  el.classList.add('search-highlight');
+  setTimeout(()=>el.classList.remove('search-highlight'), 2200);
+}
+function highlightHREmployeeRow(empId){
+  const rows = document.querySelectorAll('#view-hr table tbody tr');
+  rows.forEach(r=>{
+    const idCell = r.querySelector('td.mono');
+    if(idCell && idCell.textContent.trim()===empId){
+      r.scrollIntoView({behavior:'smooth', block:'center'});
+      r.classList.add('search-highlight');
+      setTimeout(()=>r.classList.remove('search-highlight'), 2200);
+    }
+  });
+}
+function highlightHRBuildingRow(buildingName){
+  const row = document.querySelector(`[data-building-row="${buildingName}"]`);
+  if(!row) return;
+  row.scrollIntoView({behavior:'smooth', block:'center'});
+  row.classList.add('search-highlight');
+  setTimeout(()=>row.classList.remove('search-highlight'), 2200);
+}
+function highlightHRSeatRow(seatId){
+  const row = document.querySelector(`[data-hrseat-row="${seatId}"]`);
+  if(!row) return;
+  row.scrollIntoView({behavior:'smooth', block:'center'});
+  row.classList.add('search-highlight');
+  setTimeout(()=>row.classList.remove('search-highlight'), 2200);
+}
+document.addEventListener('click', function(e){
+  const wrap = document.getElementById('globalSearchWrap');
+  if(wrap && !wrap.contains(e.target)) closeGlobalSearchResults();
+});
+
+/* boot */
+renderLoginScreen();
+updateClock();
+</script>
+</body>
+</html>
